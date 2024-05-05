@@ -3,8 +3,6 @@ from typing import List
 import orjson
 from pydantic import BaseModel
 
-from models.film import FilmMainData
-
 
 def orjson_dumps(v, *, default):
     return orjson.dumps(v, default=default).decode()
