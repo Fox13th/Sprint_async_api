@@ -26,37 +26,38 @@ class Film(FilmMainData):
 
 
 @router.get('')
-async def popular_films(sort: Optional[str] = '-imdb_rating', top: int = Query(100, gt=0),
-                     film_service: FilmService = Depends(get_film_service)):
+async def popular_films(sort: Optional[str] = '-imdb_rating', page_size: int = Query(50, gt=0),
+                        page_number: int = Query(1, gt=0), film_service: FilmService = Depends(get_film_service)):
     """
     Вывод популярных фильмов.
-    Пример запроса: http://127.0.0.1:8000/api/v1/films?sort=-imdb_rating&top=10
+    Пример запроса: http://127.0.0.1:8000/api/v1/films?sort=-imdb_rating&page_size=50&page_number=1
+    :param page_size: Количество элементов на странице
+    :param page_number: Номер страницы
     :param sort: По какому полю сортировать; по умолчанию: '-imdb_rating'
-    :param top: Сколько кинопроизведений вывести; по умолчанию: top 100 произведений
     """
-    films = await film_service.get_film(None, None, top, sort)
+    films = await film_service.get_film(None, None, page_size, page_number, sort)
+    if not films:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='film(s) not found')
 
     return films
 
 
 @router.get('/search')
-async def search_films(query: str, page_number: int = Query(1, gt=0), page_size: int = Query(50, gt=0),
-                     film_service: FilmService = Depends(get_film_service)):
+async def search_films(query: str, page_size: int = Query(50, gt=0), page_number: int = Query(1, gt=0),
+                       film_service: FilmService = Depends(get_film_service)):
     """
     Поиск по фильмам.
     Пример запроса: http://127.0.0.1:8000/api/v1/films/search?query=star&page_number=1&page_size=50
     :param query: Поисковое слово
-    :param page_number: номер страницы
     :param page_size: количество найденных фильмов на странице
+    :param page_number: номер страницы
     """
 
-    start_index = (page_number - 1) * page_size
-    end_index = start_index + page_size
+    films = await film_service.get_film(None, query, page_size, page_number,)
+    if not films:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='film(s) not found')
 
-    films = await film_service.get_film(None, query,)
-    paginated_films = films[start_index:end_index]
-
-    return paginated_films
+    return films
 
 
 # Получить кино по id

@@ -18,15 +18,15 @@ class FilmService:
         self.elastic = elastic
 
     # async def get_by_id(self, film_id: str) -> Optional[Film]:
-    async def get_film(self, film_id: str = None, query: str = None, n_elem: int = 100, sort_by: str = None) -> \
-            Optional[Film]:
+    async def get_film(self, film_id: str = None, query: str = None, n_elem: int = 100, page: int = 1,
+                       sort_by: str = None) -> Optional[Film]:
 
         # Пока что я кэширование отключил
         # film = await self._film_from_cache(film_id)
         film = None
         if not film:
             # Если фильма нет в кеше, то ищем его в Elasticsearch
-            film = await self._get_film_from_elastic(film_id, query, n_elem, sort_by)
+            film = await self._get_film_from_elastic(film_id, query, n_elem, page, sort_by)
             if not film:
                 return None
             # Сохраняем фильм в кеш (Пока отключил)
@@ -34,14 +34,14 @@ class FilmService:
 
         return film
 
-    async def _get_film_from_elastic(self, film_id: str = None, query: str = None, n_elem: int = 100,
+    async def _get_film_from_elastic(self, film_id: str = None, query: str = None, n_elem: int = 100, page: int = 1,
                                      sort_by: str = None) -> Optional[Film]:
         try:
-            if not film_id is None:
+            if film_id:
                 doc = await self.elastic.get(index='movies', id=film_id)
                 return Film(**doc['_source'])
 
-            elif not query is None:
+            elif query:
                 body_query = {
                     'query': {
                         'query_string': {
@@ -74,7 +74,9 @@ class FilmService:
                 index='movies',
                 body=body_query,
                 size=n_elem,
+                from_=n_elem * page
             )
+            #doc = await self.elastic.mget(index='movies', body=body_query)
 
             res = list()
             for i in range(n_elem):
