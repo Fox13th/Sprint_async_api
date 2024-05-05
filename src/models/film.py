@@ -23,9 +23,9 @@ class FilmMainData(BaseModel):
 
 
 class Film(FilmMainData):
-    description: str = None  # Жду ETL
-    # genres: List[GenreMainData]
-    directors: List[Person] = None  # Жду ETL
-    actors: List[Person] = None  # Жду ETL
-    writers: List[Person] = None  # Жду ETL
-    # created_at: datetime
+    description: str
+    genres: List[GenreMainData]
+    directors: List[Person]
+    actors: List[Person]
+    writers: List[Person]
+    #created_at: datetime
