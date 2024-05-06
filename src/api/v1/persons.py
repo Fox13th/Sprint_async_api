@@ -15,7 +15,7 @@ async def person_details(person_id: str, person_service: PersonService = Depends
     if not person:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='person not found')
 
-    return Person(id=person.id, title=person.full_name)
+    return Person(id=person.id, title=person.name)
 
 
 @router.get('/', response_model=List[Person])
