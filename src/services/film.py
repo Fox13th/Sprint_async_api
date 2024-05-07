@@ -1,6 +1,7 @@
 from functools import lru_cache
 from typing import Optional
 
+import orjson
 from elasticsearch import AsyncElasticsearch, NotFoundError
 from fastapi import Depends
 from redis.asyncio import Redis
@@ -17,20 +18,18 @@ class FilmService:
         self.redis = redis
         self.elastic = elastic
 
-    # async def get_by_id(self, film_id: str) -> Optional[Film]:
     async def get_film(self, film_id: str = None, query: str = None, n_elem: int = 100, page: int = 1,
                        sort_by: str = None, genre: str = None) -> Optional[Film]:
 
-        # Пока что я кэширование отключил
-        # film = await self._film_from_cache(film_id)
-        film = None
+        film_cache = f'f_{film_id}{query}{n_elem}{page}{sort_by}{genre}'
+        film = await self._film_from_cache(film_cache)
+
         if not film:
-            # Если фильма нет в кеше, то ищем его в Elasticsearch
             film = await self._get_film_from_elastic(film_id, query, n_elem, page, sort_by, genre)
             if not film:
                 return None
-            # Сохраняем фильм в кеш (Пока отключил)
-            # await self._put_film_to_cache(film)
+
+            await self._put_film_to_cache(film, film_cache)
 
         return film
 
@@ -44,9 +43,11 @@ class FilmService:
             elif query:
                 body_query = {
                     'query': {
-                        'query_string': {
-                            'default_field': 'title',
-                            'query': query
+                        'match': {
+                            'title': {
+                                'query': query,
+                                'fuzziness': 'auto'
+                            }
                         }
                     },
                 }
@@ -77,36 +78,44 @@ class FilmService:
                     ],
                 }
 
-            start_idx = 1
-            if not page == 1:
-                start_idx = n_elem * page
-
             doc = await self.elastic.search(
                 index='movies',
                 body=body_query,
                 size=n_elem,
-                from_=start_idx
+                from_=(page - 1) * n_elem
             )
 
             res = list()
             for i in range(len(doc['hits']['hits'])):
                 res.append(FilmMainData(**doc['hits']['hits'][i]['_source']))
 
-            return res
-
         except NotFoundError:
             return None
 
-    async def _film_from_cache(self, film_id: str) -> Optional[Film]:
-        data = await self.redis.get(film_id)
+        return res
+
+
+
+    async def _film_from_cache(self, key_cache: str) -> Optional[Film]:
+
+        data = await self.redis.get(key_cache)
         if not data:
             return None
 
-        film = Film.parse_raw(data)
+        try:
+            film = Film.parse_raw(data)
+        except ValueError:
+            film = [FilmMainData.parse_raw(f_data) for f_data in orjson.loads(data)]
+
         return film
 
-    async def _put_film_to_cache(self, film: Film):
-        await self.redis.set(film.id, film.json(), FILM_CACHE_EXPIRE_IN_SECONDS)
+    async def _put_film_to_cache(self, film, key_cache: str):
+
+        if type(film) == list:
+            f_list = [f_data.json() for f_data in film]
+            await self.redis.set(key_cache, orjson.dumps(f_list), FILM_CACHE_EXPIRE_IN_SECONDS)
+        else:
+            await self.redis.set(key_cache, film.json(), FILM_CACHE_EXPIRE_IN_SECONDS)
 
 
 @lru_cache()

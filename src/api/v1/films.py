@@ -27,7 +27,8 @@ class Film(FilmMainData):
 
 @router.get('')
 async def popular_films(sort: Optional[str] = '-imdb_rating', genre: Optional[str] = None,
-                        page_size: int = Query(50, gt=0), page_number: int = Query(1, gt=0),
+                        page_size: int = Query(ge=1, le=100, default=50),
+                        page_number: int = Query(ge=1, default=1),
                         film_service: FilmService = Depends(get_film_service)):
     """
     Вывод популярных фильмов.
@@ -46,7 +47,8 @@ async def popular_films(sort: Optional[str] = '-imdb_rating', genre: Optional[st
 
 
 @router.get('/search')
-async def search_films(query: str, page_size: int = Query(50, gt=0), page_number: int = Query(1, gt=0),
+async def search_films(query: str, page_size: int = Query(ge=1, le=100, default=50),
+                       page_number: int = Query(ge=1, default=1),
                        film_service: FilmService = Depends(get_film_service)):
     """
     Поиск по фильмам.
@@ -56,7 +58,7 @@ async def search_films(query: str, page_size: int = Query(50, gt=0), page_number
     :param page_number: номер страницы
     """
 
-    films = await film_service.get_film(None, query, page_size, page_number,)
+    films = await film_service.get_film(None, query, page_size, page_number, )
     if not films:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='film(s) not found')
 
