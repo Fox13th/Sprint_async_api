@@ -1,31 +1,15 @@
-from typing import List, Optional
+from typing import Optional
 from http import HTTPStatus
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel
 
+from models.film import Film
 from services.film import FilmService, get_film_service
-from models.genre import GenreMainData
-from models.person import Person
 
 router = APIRouter()
 
 
-class FilmMainData(BaseModel):
-    id: str
-    title: str
-    imdb_rating: float
-
-
-class Film(FilmMainData):
-    description: str
-    genres: List[GenreMainData]
-    directors: List[Person]
-    actors: List[Person]
-    writers: List[Person]
-
-
-@router.get('')
+@router.get('/')
 async def popular_films(sort: Optional[str] = '-imdb_rating', genre: Optional[str] = None,
                         page_size: int = Query(ge=1, le=100, default=50),
                         page_number: int = Query(ge=1, default=1),
