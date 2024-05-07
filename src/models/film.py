@@ -5,7 +5,7 @@ import orjson
 from pydantic import BaseModel
 
 from models.genre import GenreMainData
-from models.person import Person
+from models.person import Person, PersonMainData
 
 
 def orjson_dumps(v, *, default):
@@ -25,7 +25,7 @@ class FilmMainData(BaseModel):
 class Film(FilmMainData):
     description: str
     genres: List[GenreMainData]
-    directors: List[Person]
-    actors: List[Person]
-    writers: List[Person]
+    directors: List[PersonMainData]
+    actors: List[PersonMainData]
+    writers: List[PersonMainData]
     #created_at: datetime

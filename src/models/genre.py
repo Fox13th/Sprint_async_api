@@ -23,5 +23,5 @@ class GenreMainData(BaseModel):
 
 
 class Genre(GenreMainData):
-    description: str
+    description: str = None
     films: List[GenreFilm]
