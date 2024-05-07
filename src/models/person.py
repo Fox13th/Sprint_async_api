@@ -12,6 +12,7 @@ def orjson_dumps(v, *, default):
 class PersonFilm(BaseModel):
     id: str
     roles: List[str]
+    imdb_rating: float
 
 
 class Person(BaseModel):

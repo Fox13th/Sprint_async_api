@@ -56,8 +56,6 @@ class PersonService:
             size=page_size,
             from_=((page_number - 1) * page_size)
         )
-        print(docs)
-        [print(doc) for doc in docs['hits']['hits']]
         return [Person(**doc['_source']) for doc in docs['hits']['hits']]
 
     async def _get_person_from_elastic(self, person_id: str) -> Optional[Person]:
@@ -65,6 +63,7 @@ class PersonService:
             doc = await self.elastic.get(index=self.index, id=person_id)
         except NotFoundError:
             return None
+        print(doc)
         return Person(**doc['_source'])
 
     async def _person_from_cache(self, person_id: str) -> Optional[Person]:
