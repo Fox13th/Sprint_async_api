@@ -9,10 +9,20 @@ def orjson_dumps(v, *, default):
     return orjson.dumps(v, default=default).decode()
 
 
-class Person(BaseModel):
+class PersonFilm(BaseModel):
     id: str
-    full_name: str
+    roles: List[str]
+    imdb_rating: float
+
+
+class PersonMainData(BaseModel):
+    id: str
+    name: str
 
     class Config:
         json_loads = orjson.loads
         json_dumps = orjson_dumps
+
+
+class Person(PersonMainData):
+    films: List[PersonFilm]
