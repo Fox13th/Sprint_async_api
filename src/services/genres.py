@@ -43,15 +43,11 @@ class GenreService:
                     'query': {'match_all': {}},
                 }
 
-            start_idx = 1
-            if not page == 1:
-                start_idx = n_elem * page
-
             doc = await self.elastic.search(
                 index='genres',
                 body=body_query,
                 size=n_elem,
-                from_=start_idx
+                from_=(page - 1) * n_elem
             )
 
             res = list()
