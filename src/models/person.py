@@ -15,11 +15,14 @@ class PersonFilm(BaseModel):
     imdb_rating: float
 
 
-class Person(BaseModel):
+class PersonMainData(BaseModel):
     id: str
     name: str
-    films: List[PersonFilm]
 
     class Config:
         json_loads = orjson.loads
         json_dumps = orjson_dumps
+
+
+class Person(PersonMainData):
+    films: List[PersonFilm]
