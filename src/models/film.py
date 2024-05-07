@@ -15,7 +15,7 @@ def orjson_dumps(v, *, default):
 class FilmMainData(BaseModel):
     id: str
     title: str
-    imdb_rating: float
+    imdb_rating: float = None
 
     class Config:
         json_loads = orjson.loads
@@ -28,4 +28,4 @@ class Film(FilmMainData):
     directors: List[Person]
     actors: List[Person]
     writers: List[Person]
-    created_at: datetime
+    #created_at: datetime
