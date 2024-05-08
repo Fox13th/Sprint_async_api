@@ -9,7 +9,6 @@ from services.film import FilmService, get_film_service
 router = APIRouter()
 
 
-@router.get('/', response_model=List[FilmMainData])
 async def popular_films(sort: Optional[str] = '-imdb_rating', genre: Optional[str] = None,
                         page_size: int = Query(ge=1, le=100, default=50),
                         page_number: int = Query(ge=1, default=1),
