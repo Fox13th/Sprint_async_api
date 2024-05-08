@@ -5,28 +5,14 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 
 from services.genres import GenreService, get_genre_service
+from models.genre import Genre, GenreMainData
 
 router = APIRouter()
 
 
-class GenreFilm(BaseModel):
-    id: str
-    title: str
-
-
-class GenreMainData(BaseModel):
-    id: str
-    name: str
-
-
-class Genre(GenreMainData):
-    description: str = None
-    films: List[GenreFilm]
-
-
-@router.get('')
+@router.get('/', response_model=List[Genre])
 async def list_genres(page_size: int = Query(50, gt=0), page_number: int = Query(1, gt=0),
-                      genre_service: GenreService = Depends(get_genre_service)):
+                      genre_service: GenreService = Depends(get_genre_service)) -> List[Genre]:
     """
     Вывод списка жанров
     Пример запроса: http://127.0.0.1:8000/api/v1/genres

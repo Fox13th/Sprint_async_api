@@ -17,6 +17,7 @@ class GenreService:
     def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
         self.redis = redis
         self.elastic = elastic
+        self.idx = 'genres'
 
     async def get_genre(self, genre_id: str = None, n_elem: int = 100, page: int = 1) -> Optional[Genre]:
 
@@ -35,7 +36,7 @@ class GenreService:
     async def _get_genre_from_elastic(self, genre_id: str = None, n_elem: int = 50, page: int = 1) -> Optional[Genre]:
         try:
             if genre_id:
-                doc = await self.elastic.get(index='genres', id=genre_id)
+                doc = await self.elastic.get(index=self.idx, id=genre_id)
                 return Genre(**doc['_source'])
 
             else:
@@ -44,7 +45,7 @@ class GenreService:
                 }
 
             doc = await self.elastic.search(
-                index='genres',
+                index=self.idx,
                 body=body_query,
                 size=n_elem,
                 from_=(page - 1) * n_elem
@@ -68,7 +69,7 @@ class GenreService:
         try:
             genre = Genre.parse_raw(data)
         except ValueError:
-            genre = [GenreMainData.parse_raw(f_data) for f_data in orjson.loads(data)]
+            genre = [Genre.parse_raw(f_data) for f_data in orjson.loads(data)]
 
         return genre
 

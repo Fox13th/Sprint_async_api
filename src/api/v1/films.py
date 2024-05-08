@@ -1,19 +1,19 @@
-from typing import Optional
+from typing import Optional, List
 from http import HTTPStatus
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
-from models.film import Film
+from models.film import Film, FilmMainData
 from services.film import FilmService, get_film_service
 
 router = APIRouter()
 
 
-@router.get('/')
+@router.get('/', response_model=List[FilmMainData])
 async def popular_films(sort: Optional[str] = '-imdb_rating', genre: Optional[str] = None,
                         page_size: int = Query(ge=1, le=100, default=50),
                         page_number: int = Query(ge=1, default=1),
-                        film_service: FilmService = Depends(get_film_service)):
+                        film_service: FilmService = Depends(get_film_service)) -> List[FilmMainData]:
     """
     Вывод популярных фильмов.
     Пример запроса: http://127.0.0.1:8000/api/v1/films?sort=-imdb_rating&page_number=1&page_size=50
@@ -30,10 +30,10 @@ async def popular_films(sort: Optional[str] = '-imdb_rating', genre: Optional[st
     return films
 
 
-@router.get('/search')
+@router.get('/search', response_model=List[FilmMainData])
 async def search_films(query: str, page_size: int = Query(ge=1, le=100, default=50),
                        page_number: int = Query(ge=1, default=1),
-                       film_service: FilmService = Depends(get_film_service)):
+                       film_service: FilmService = Depends(get_film_service)) -> List[FilmMainData]:
     """
     Поиск по фильмам.
     Пример запроса: http://127.0.0.1:8000/api/v1/films/search?query=star&page_number=1&page_size=50

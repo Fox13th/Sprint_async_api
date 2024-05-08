@@ -3,6 +3,7 @@ from typing import Optional, List
 
 from elasticsearch import AsyncElasticsearch, NotFoundError
 from fastapi import Depends
+from orjson import orjson
 from redis.asyncio import Redis
 
 from db.elastic import get_elastic
@@ -19,12 +20,14 @@ class PersonService:
         self.index = 'persons'
 
     async def get_by_id(self, person_id: str) -> Optional[Person]:
-        person = await self._person_from_cache(person_id)
+
+        person_cache = f'p_{person_id}'
+        person = await self._person_from_cache(person_cache)
         if not person:
             person = await self._get_person_from_elastic(person_id)
             if not person:
                 return None
-            await self._put_person_to_cache(person)
+            await self._put_person_to_cache(person, person_cache)
 
         return person
 
@@ -35,28 +38,36 @@ class PersonService:
             query: str = None,
     ) -> Optional[List[Person]]:
 
-        if not query:
-            body = {
-                'query': {
-                    'match_all': {}
-                }}
-        else:
-            body = {
-                'query': {
-                    'query_string': {
-                        'default_field': 'full_name',
-                        'query': query
+        person_cache = f'p_{page_number}{page_size}{query}'
+        person = await self._person_from_cache(person_cache)
+
+        if not person:
+            if not query:
+                body = {
+                    'query': {
+                        'match_all': {}
+                    }}
+            else:
+                body = {
+                    'query': {
+                        'query_string': {
+                            'default_field': 'name',
+                            'query': query
+                        }
                     }
                 }
-            }
 
-        docs = await self.elastic.search(
-            index=self.index,
-            body=body,
-            size=page_size,
-            from_=((page_number - 1) * page_size)
-        )
-        return [Person(**doc['_source']) for doc in docs['hits']['hits']]
+            docs = await self.elastic.search(
+                index=self.index,
+                body=body,
+                size=page_size,
+                from_=((page_number - 1) * page_size)
+            )
+
+            person = [Person(**doc['_source']) for doc in docs['hits']['hits']]
+            await self._put_person_to_cache(person, person_cache)
+
+        return person
 
     async def _get_person_from_elastic(self, person_id: str) -> Optional[Person]:
         try:
@@ -66,16 +77,25 @@ class PersonService:
         print(doc)
         return Person(**doc['_source'])
 
-    async def _person_from_cache(self, person_id: str) -> Optional[Person]:
-        data = await self.redis.get(person_id)
+    async def _person_from_cache(self, key_cache: str) -> Optional[Person]:
+        data = await self.redis.get(key_cache)
         if not data:
             return None
 
-        person = Person.parse_raw(data)
+        try:
+            person = Person.parse_raw(data)
+        except ValueError:
+            person = [Person.parse_raw(f_data) for f_data in orjson.loads(data)]
+
         return person
 
-    async def _put_person_to_cache(self, person: Person):
-        await self.redis.set(person.id, person.json(), PERSON_CACHE_EXPIRE_IN_SECONDS)
+    async def _put_person_to_cache(self, person, key_cache):
+
+        if type(person) == list:
+            g_list = [p_data.json() for p_data in person]
+            await self.redis.set(key_cache, orjson.dumps(g_list), PERSON_CACHE_EXPIRE_IN_SECONDS)
+        else:
+            await self.redis.set(key_cache, person.json(), PERSON_CACHE_EXPIRE_IN_SECONDS)
 
 
 @lru_cache()
