@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 import orjson
 from pydantic import BaseModel
 
@@ -23,5 +21,5 @@ class GenreMainData(BaseModel):
 
 
 class Genre(GenreMainData):
-    description: Optional[str] = None
-    films: List[GenreFilm]
+    description: str | None = None
+    films: list[GenreFilm]

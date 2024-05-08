@@ -1,5 +1,4 @@
 from functools import lru_cache
-from typing import Optional, List
 
 from elasticsearch import AsyncElasticsearch, NotFoundError
 from fastapi import Depends
@@ -19,7 +18,7 @@ class PersonService:
         self.elastic = elastic
         self.index = 'persons'
 
-    async def get_by_id(self, person_id: str) -> Optional[Person]:
+    async def get_by_id(self, person_id: str) -> Person | None:
 
         person_cache = f'p_{person_id}'
         person = await self._person_from_cache(person_cache)
@@ -36,7 +35,7 @@ class PersonService:
             page_number: int = 1,
             page_size: int = 50,
             query: str = None,
-    ) -> Optional[List[Person]]:
+    ) -> list[Person] | None:
 
         person_cache = f'p_{page_number}{page_size}{query}'
         person = await self._person_from_cache(person_cache)
@@ -70,14 +69,14 @@ class PersonService:
 
         return person
 
-    async def _get_person_from_elastic(self, person_id: str) -> Optional[Person]:
+    async def _get_person_from_elastic(self, person_id: str) -> Person | None:
         try:
             doc = await self.elastic.get(index=self.index, id=person_id)
         except NotFoundError:
             return None
         return Person(**doc['_source'])
 
-    async def _person_from_cache(self, key_cache: str) -> Optional[Person]:
+    async def _person_from_cache(self, key_cache: str) -> Person | None:
         data = await self.redis.get(key_cache)
         if not data:
             return None

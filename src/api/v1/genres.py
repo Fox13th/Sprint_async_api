@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import List
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
@@ -9,9 +9,10 @@ from models.genre import Genre, GenreMainData
 router = APIRouter()
 
 
-@router.get('/', response_model=List[Genre])
-async def list_genres(page_size: int = Query(50, gt=0), page_number: int = Query(1, gt=0),
-                      genre_service: GenreService = Depends(get_genre_service)) -> List[Genre]:
+@router.get('/', response_model=list[Genre])
+async def list_genres(page_size: Annotated[int, Query(description='Pagination page size', ge=1, default=50)] = 50,
+                      page_number: Annotated[int, Query(description='Page number', ge=1, default=1)] = 1,
+                      genre_service: GenreService = Depends(get_genre_service)) -> list[Genre]:
     """
     Вывод списка жанров
     Пример запроса: http://127.0.0.1:8000/api/v1/genres

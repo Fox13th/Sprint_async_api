@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import List, Optional
 
 import orjson
 from pydantic import BaseModel
@@ -24,9 +23,9 @@ class FilmMainData(BaseModel):
 
 class Film(FilmMainData):
     description: str
-    genres: List[GenreMainData]
-    directors: List[PersonMainData]
-    actors: List[PersonMainData]
-    writers: List[PersonMainData]
-    creation_date: Optional[datetime] = None
+    genres: list[GenreMainData]
+    directors: list[PersonMainData]
+    actors: list[PersonMainData]
+    writers: list[PersonMainData]
+    creation_date: datetime | None = None
       

@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Annotated
 from http import HTTPStatus
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -9,11 +9,12 @@ from services.film import FilmService, get_film_service
 router = APIRouter()
 
 
-@router.get('/', response_model=List[FilmMainData])
-async def popular_films(sort: Optional[str] = '-imdb_rating', genre: Optional[str] = None,
-                        page_size: int = Query(ge=1, le=100, default=50),
-                        page_number: int = Query(ge=1, default=1),
-                        film_service: FilmService = Depends(get_film_service)) -> List[FilmMainData]:
+@router.get('/', response_model=list[FilmMainData])
+async def popular_films(sort: str | None = '-imdb_rating',
+                        genre: str | None = None,
+                        page_size: Annotated[int, Query(description='Pagination page size', ge=1, default=50)] = 50,
+                        page_number: Annotated[int, Query(description='Page number', ge=1, default=1)] = 1,
+                        film_service: FilmService = Depends(get_film_service)) -> list[FilmMainData]:
     """
     Вывод популярных фильмов.
     Пример запроса: http://127.0.0.1:8000/api/v1/films?sort=-imdb_rating&page_number=1&page_size=50
@@ -30,10 +31,11 @@ async def popular_films(sort: Optional[str] = '-imdb_rating', genre: Optional[st
     return films
 
 
-@router.get('/search/', response_model=List[FilmMainData])
-async def search_films(query: str, page_size: int = Query(ge=1, le=100, default=50),
-                       page_number: int = Query(ge=1, default=1),
-                       film_service: FilmService = Depends(get_film_service)) -> List[FilmMainData]:
+@router.get('/search/', response_model=list[FilmMainData])
+async def search_films(query: str,
+                       page_size: Annotated[int, Query(description='Pagination page size', ge=1, default=50)] = 50,
+                       page_number: Annotated[int, Query(description='Page number', ge=1, default=1)] = 1,
+                       film_service: FilmService = Depends(get_film_service)) -> list[FilmMainData]:
     """
     Поиск по фильмам.
     Пример запроса: http://127.0.0.1:8000/api/v1/films/search/?query=star&page_number=1&page_size=50

@@ -1,6 +1,3 @@
-from enum import Enum
-from typing import List
-
 import orjson
 from pydantic import BaseModel
 
@@ -11,7 +8,7 @@ def orjson_dumps(v, *, default):
 
 class PersonFilm(BaseModel):
     id: str
-    roles: List[str]
+    roles: list[str]
     imdb_rating: float
 
 
@@ -25,4 +22,4 @@ class PersonMainData(BaseModel):
 
 
 class Person(PersonMainData):
-    films: List[PersonFilm]
+    films: list[PersonFilm]

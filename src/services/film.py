@@ -1,5 +1,4 @@
 from functools import lru_cache
-from typing import Optional
 
 import orjson
 from elasticsearch import AsyncElasticsearch, NotFoundError
@@ -20,7 +19,7 @@ class FilmService:
         self.idx = 'movies'
 
     async def get_film(self, film_id: str = None, query: str = None, n_elem: int = 100, page: int = 1,
-                       sort_by: str = None, genre: str = None) -> Optional[Film]:
+                       sort_by: str = None, genre: str = None) -> Film | None:
 
         film_cache = f'f_{film_id}{query}{n_elem}{page}{sort_by}{genre}'
         film = await self._film_from_cache(film_cache)
@@ -35,7 +34,7 @@ class FilmService:
         return film
 
     async def _get_film_from_elastic(self, film_id: str = None, query: str = None, n_elem: int = 100, page: int = 1,
-                                     sort_by: str = None, genre: str = None) -> Optional[Film]:
+                                     sort_by: str = None, genre: str = None) -> Film | None:
         try:
             if film_id:
                 doc = await self.elastic.get(index=self.idx, id=film_id)
@@ -95,7 +94,7 @@ class FilmService:
 
         return res
 
-    async def _film_from_cache(self, key_cache: str) -> Optional[Film]:
+    async def _film_from_cache(self, key_cache: str) -> Film | None:
 
         data = await self.redis.get(key_cache)
         if not data:

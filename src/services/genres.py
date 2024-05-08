@@ -1,5 +1,4 @@
 from functools import lru_cache
-from typing import Optional
 
 from elasticsearch import AsyncElasticsearch, NotFoundError
 from fastapi import Depends
@@ -10,7 +9,7 @@ from db.elastic import get_elastic
 from db.redis_db import get_redis
 from models.genre import Genre, GenreMainData
 
-FILM_CACHE_EXPIRE_IN_SECONDS = 60 * 5
+GENRE_CACHE_EXPIRE_IN_SECONDS = 60 * 5
 
 
 class GenreService:
@@ -19,7 +18,7 @@ class GenreService:
         self.elastic = elastic
         self.idx = 'genres'
 
-    async def get_genre(self, genre_id: str = None, n_elem: int = 100, page: int = 1) -> Optional[Genre]:
+    async def get_genre(self, genre_id: str = None, n_elem: int = 100, page: int = 1) -> Genre | None:
 
         genre_cache = f'g_{genre_id}{n_elem}{page}'
         genre = await self._genre_from_cache(genre_cache)
@@ -33,7 +32,7 @@ class GenreService:
 
         return genre
 
-    async def _get_genre_from_elastic(self, genre_id: str = None, n_elem: int = 50, page: int = 1) -> Optional[Genre]:
+    async def _get_genre_from_elastic(self, genre_id: str = None, n_elem: int = 50, page: int = 1) -> Genre | None:
         try:
             if genre_id:
                 doc = await self.elastic.get(index=self.idx, id=genre_id)
@@ -60,7 +59,7 @@ class GenreService:
 
         return res
 
-    async def _genre_from_cache(self, key_cache: str) -> Optional[Genre]:
+    async def _genre_from_cache(self, key_cache: str) -> Genre | None:
 
         data = await self.redis.get(key_cache)
         if not data:
@@ -77,9 +76,9 @@ class GenreService:
 
         if type(genre) == list:
             g_list = [g_data.json() for g_data in genre]
-            await self.redis.set(key_cache, orjson.dumps(g_list), FILM_CACHE_EXPIRE_IN_SECONDS)
+            await self.redis.set(key_cache, orjson.dumps(g_list), GENRE_CACHE_EXPIRE_IN_SECONDS)
         else:
-            await self.redis.set(key_cache, genre.json(), FILM_CACHE_EXPIRE_IN_SECONDS)
+            await self.redis.set(key_cache, genre.json(), GENRE_CACHE_EXPIRE_IN_SECONDS)
 
 
 @lru_cache()
