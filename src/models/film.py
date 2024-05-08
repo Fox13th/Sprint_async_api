@@ -1,11 +1,11 @@
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 import orjson
 from pydantic import BaseModel
 
 from models.genre import GenreMainData
-from models.person import Person, PersonMainData
+from models.person import PersonMainData
 
 
 def orjson_dumps(v, *, default):
@@ -28,4 +28,5 @@ class Film(FilmMainData):
     directors: List[PersonMainData]
     actors: List[PersonMainData]
     writers: List[PersonMainData]
-    #created_at: datetime
+    creation_date: Optional[datetime] = None
+      

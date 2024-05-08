@@ -17,6 +17,7 @@ class FilmService:
     def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
         self.redis = redis
         self.elastic = elastic
+        self.idx = 'movies'
 
     async def get_film(self, film_id: str = None, query: str = None, n_elem: int = 100, page: int = 1,
                        sort_by: str = None, genre: str = None) -> Optional[Film]:
@@ -37,7 +38,7 @@ class FilmService:
                                      sort_by: str = None, genre: str = None) -> Optional[Film]:
         try:
             if film_id:
-                doc = await self.elastic.get(index='movies', id=film_id)
+                doc = await self.elastic.get(index=self.idx, id=film_id)
                 return Film(**doc['_source'])
 
             elif query:
@@ -79,7 +80,7 @@ class FilmService:
                 }
 
             doc = await self.elastic.search(
-                index='movies',
+                index=self.idx,
                 body=body_query,
                 size=n_elem,
                 from_=(page - 1) * n_elem
@@ -93,8 +94,6 @@ class FilmService:
             return None
 
         return res
-
-
 
     async def _film_from_cache(self, key_cache: str) -> Optional[Film]:
 
