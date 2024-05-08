@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 import orjson
 from pydantic import BaseModel
@@ -28,4 +28,4 @@ class Film(FilmMainData):
     directors: List[PersonMainData]
     actors: List[PersonMainData]
     writers: List[PersonMainData]
-    #created_at: datetime
+    creation_date: Optional[datetime] = None
