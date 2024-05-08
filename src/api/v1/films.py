@@ -30,7 +30,7 @@ async def popular_films(sort: Optional[str] = '-imdb_rating', genre: Optional[st
     return films
 
 
-@router.get('/search', response_model=List[FilmMainData])
+@router.get('/search/', response_model=List[FilmMainData])
 async def search_films(query: str, page_size: int = Query(ge=1, le=100, default=50),
                        page_number: int = Query(ge=1, default=1),
                        film_service: FilmService = Depends(get_film_service)) -> List[FilmMainData]:

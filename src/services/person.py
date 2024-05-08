@@ -40,7 +40,6 @@ class PersonService:
 
         person_cache = f'p_{page_number}{page_size}{query}'
         person = await self._person_from_cache(person_cache)
-
         if not person:
             if not query:
                 body = {
@@ -50,11 +49,13 @@ class PersonService:
             else:
                 body = {
                     'query': {
-                        'query_string': {
-                            'default_field': 'name',
-                            'query': query
+                        'match': {
+                            'name': {
+                                'query': query,
+                                'fuzziness': 'auto'
+                            }
                         }
-                    }
+                    },
                 }
 
             docs = await self.elastic.search(
@@ -74,7 +75,6 @@ class PersonService:
             doc = await self.elastic.get(index=self.index, id=person_id)
         except NotFoundError:
             return None
-        print(doc)
         return Person(**doc['_source'])
 
     async def _person_from_cache(self, key_cache: str) -> Optional[Person]:
@@ -90,7 +90,6 @@ class PersonService:
         return person
 
     async def _put_person_to_cache(self, person, key_cache):
-
         if type(person) == list:
             g_list = [p_data.json() for p_data in person]
             await self.redis.set(key_cache, orjson.dumps(g_list), PERSON_CACHE_EXPIRE_IN_SECONDS)

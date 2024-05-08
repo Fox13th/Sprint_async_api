@@ -22,7 +22,7 @@ def test_get_films(client):
 
 @pytest.mark.persons
 def test_get_films_search(client):
-    response = client.get('/api/v1/films/search?query=test')
+    response = client.get('/api/v1/films/search/?query=test')
     assert response.status_code == 200
 
 
