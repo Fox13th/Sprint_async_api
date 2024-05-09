@@ -10,3 +10,5 @@ RUN  pip install --upgrade pip \
      && ln -sf /usr/share/zoneinfo/Europe/Moscow /etc/localtime
 
 COPY . /app
+
+WORKDIR /app/src
