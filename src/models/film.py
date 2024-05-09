@@ -1,22 +1,10 @@
 from datetime import datetime
 
 import orjson
-from pydantic import BaseModel
 
-
-def orjson_dumps(v, *, default):
-    return orjson.dumps(v, default=default).decode()
-
-
-class BaseOrjsonModel(BaseModel):
-    class Config:
-        json_loads = orjson.loads
-        json_dumps = orjson_dumps
-
-
-class ModelMainData(BaseOrjsonModel):
-    id: str
-    name: str
+from models.common import BaseOrjsonModel
+from models.genre import GenreBaseData
+from models.person import PersonBaseData
 
 
 class FilmMainData(BaseOrjsonModel):
@@ -27,8 +15,8 @@ class FilmMainData(BaseOrjsonModel):
 
 class Film(FilmMainData):
     description: str | None
-    genres: list[ModelMainData]
-    directors: list[ModelMainData]
-    actors: list[ModelMainData]
-    writers: list[ModelMainData]
+    genres: list[GenreBaseData]
+    directors: list[PersonBaseData]
+    actors: list[PersonBaseData]
+    writers: list[PersonBaseData]
     creation_date: datetime | None = None
