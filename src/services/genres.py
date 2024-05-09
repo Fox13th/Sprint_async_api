@@ -18,7 +18,7 @@ class GenreService:
         self.elastic = elastic
         self.idx = 'genres'
 
-    async def get_genre(self, genre_id: str = None, n_elem: int = 100, page: int = 1) -> Genre | None:
+    async def get_genre(self, genre_id: str = None, n_elem: int = 100, page: int = 1) -> Genre | list[Genre] | None:
 
         genre_cache = f'g_{genre_id}{n_elem}{page}'
         genre = await self._genre_from_cache(genre_cache)
