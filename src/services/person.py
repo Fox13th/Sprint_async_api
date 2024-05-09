@@ -7,7 +7,7 @@ from redis.asyncio import Redis
 
 from db.elastic import get_elastic
 from db.redis_db import get_redis
-from models.person import Person
+from models.film import Person
 
 PERSON_CACHE_EXPIRE_IN_SECONDS = 60 * 5
 

@@ -3,7 +3,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
-from models.person import Person, PersonFilm
+from models.film import Person, PersonFilm
 from services.person import PersonService, get_person_service
 
 router = APIRouter()
