@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from services.genres import GenreService, get_genre_service
-from models.film import Genre, GenreMainData
+from models.genre import Genre
 
 router = APIRouter()
 

@@ -14,34 +14,9 @@ class BaseOrjsonModel(BaseModel):
         json_dumps = orjson_dumps
 
 
-class GenreFilm(BaseModel):
-    id: str
-    title: str
-
-
-class GenreMainData(BaseOrjsonModel):
+class ModelMainData(BaseOrjsonModel):
     id: str
     name: str
-
-
-class Genre(GenreMainData):
-    description: str | None = None
-    films: list[GenreFilm]
-
-
-class PersonFilm(BaseModel):
-    id: str
-    roles: list[str]
-    imdb_rating: float
-
-
-class PersonMainData(BaseOrjsonModel):
-    id: str
-    name: str
-
-
-class Person(PersonMainData):
-    films: list[PersonFilm]
 
 
 class FilmMainData(BaseOrjsonModel):
@@ -52,8 +27,8 @@ class FilmMainData(BaseOrjsonModel):
 
 class Film(FilmMainData):
     description: str
-    genres: list[GenreMainData]
-    directors: list[PersonMainData]
-    actors: list[PersonMainData]
-    writers: list[PersonMainData]
+    genres: list[ModelMainData]
+    directors: list[ModelMainData]
+    actors: list[ModelMainData]
+    writers: list[ModelMainData]
     creation_date: datetime | None = None
