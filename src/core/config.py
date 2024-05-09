@@ -23,6 +23,6 @@ class Settings(BaseSettings):
 
 
 @lru_cache(maxsize=None)
-def get_settings():
+def get_settings(env_file: str = None):
     """Получаем настройки приложения, сохраняя в кэш."""
-    return Settings()
+    return Settings(_env_file=env_file)
