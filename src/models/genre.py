@@ -1,6 +1,5 @@
 from pydantic import BaseModel
-
-from models.film import ModelMainData
+from models.common import BaseOrjsonModel
 
 
 class GenreFilm(BaseModel):
@@ -8,6 +7,11 @@ class GenreFilm(BaseModel):
     title: str
 
 
-class Genre(ModelMainData):
+class GenreBaseData(BaseOrjsonModel):
+    id: str
+    name: str
+
+
+class Genre(GenreBaseData):
     description: str | None = None
     films: list[GenreFilm]
