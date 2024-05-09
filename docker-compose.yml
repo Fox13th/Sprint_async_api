@@ -7,10 +7,12 @@ services:
 
   fastapi:
     build: .
-    command: "python3 ./src/main.py"
+    command: "gunicorn -w 2 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:${FAST_API_INTERNAL_PORT}"
     expose:
       - "${FAST_API_INTERNAL_PORT}"
     restart: on-failure
+    volumes:
+      - ./.env:/app/src/.env
     env_file:
       - .env
     depends_on:

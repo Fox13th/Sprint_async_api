@@ -26,7 +26,7 @@ class FilmMainData(BaseOrjsonModel):
 
 
 class Film(FilmMainData):
-    description: str
+    description: str | None
     genres: list[ModelMainData]
     directors: list[ModelMainData]
     actors: list[ModelMainData]
