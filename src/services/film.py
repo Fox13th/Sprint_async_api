@@ -16,7 +16,7 @@ class FilmService(DataCache):
         self.idx = 'movies'
 
     async def get_film(self, film_id: str = None, query: str = None, n_elem: int = 100, page: int = 1,
-                       sort_by: str = None, genre: str = None) -> Film | None:
+                       sort_by: str = None, genre: str = None) -> Film | list[Film] | None:
 
         film_cache = f'f_{film_id}{query}{n_elem}{page}{sort_by}{genre}'
 

@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     logging_config.dictConfig(LOGGING)
 
     class Config:
-        env_file = ".example.env"
+        env_file = ".env"
         extra = "ignore"
 
 

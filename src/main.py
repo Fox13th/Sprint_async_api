@@ -1,5 +1,3 @@
-import logging
-
 import uvicorn
 from elasticsearch import AsyncElasticsearch
 from fastapi import FastAPI
@@ -7,12 +5,12 @@ from fastapi.responses import ORJSONResponse
 from redis.asyncio import Redis
 from contextlib import asynccontextmanager
 
-
 from api.v1 import films, genres, persons
 
 from core import config
-from core.logger import LOGGING
 from db import elastic, redis_db
+
+settings = config.get_settings()
 
 
 @asynccontextmanager
@@ -20,8 +18,8 @@ async def lifespan(app: FastAPI):
     """@app.on_event("startup") and @app.on_event("shutdown") was deprecated.\n
     Recommended to use "lifespan"."""
     # startup
-    redis_db.redis = Redis(host=config.REDIS_HOST, port=config.REDIS_PORT)
-    elastic.es = AsyncElasticsearch(hosts=[f'{config.ELASTIC_HOST}:{config.ELASTIC_PORT}'])
+    redis_db.redis = Redis(host=settings.redis_host, port=settings.redis_port)
+    elastic.es = AsyncElasticsearch(hosts=[f'{settings.elastic_host}:{settings.elastic_port}'])
     yield
 
     # shutdown
@@ -30,7 +28,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title=config.PROJECT_NAME,
+    title=settings.project_name,
     docs_url='/api/openapi',
     openapi_url='/api/openapi.json',
     default_response_class=ORJSONResponse,

@@ -11,8 +11,8 @@ router = APIRouter()
 
 @router.get('/', response_model=list[Person])
 async def persons(
-        page_number: Annotated[int, Query(description='Page number', ge=1, default=1)] = 1,
-        page_size: Annotated[int, Query(description='Pagination page size', ge=1, default=10)] = 10,
+        page_number: Annotated[int, Query(description='Page number', ge=1)] = 1,
+        page_size: Annotated[int, Query(description='Pagination page size', ge=1)] = 10,
         person_service: PersonService = Depends(get_person_service)
 ) -> list[Person]:
     """Получить список всех persons."""
@@ -29,8 +29,8 @@ async def persons(
 
 @router.get('/search', response_model=list[Person])
 async def persons_search(
-        page_number: Annotated[int, Query(description='Page number', ge=1, default=1)] = 1,
-        page_size: Annotated[int, Query(description='Pagination page size', ge=1, default=10)] = 10,
+        page_number: Annotated[int, Query(description='Page number', ge=1)] = 1,
+        page_size: Annotated[int, Query(description='Pagination page size', ge=1)] = 10,
         query: str = None,
         person_service: PersonService = Depends(get_person_service)
 ) -> list[Person]:

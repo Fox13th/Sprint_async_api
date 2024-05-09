@@ -10,9 +10,11 @@ router = APIRouter()
 
 
 @router.get('/', response_model=list[Genre])
-async def list_genres(page_size: Annotated[int, Query(description='Pagination page size', ge=1, default=50)] = 50,
-                      page_number: Annotated[int, Query(description='Page number', ge=1, default=1)] = 1,
-                      genre_service: GenreService = Depends(get_genre_service)) -> list[Genre]:
+async def list_genres(
+        page_size: Annotated[int, Query(description='Pagination page size', ge=1)] = 50,
+        page_number: Annotated[int, Query(description='Page number', ge=1)] = 1,
+        genre_service: GenreService = Depends(get_genre_service)
+) -> list[Genre]:
     """
     Вывод списка жанров
     Пример запроса: http://127.0.0.1:8000/api/v1/genres
@@ -25,7 +27,7 @@ async def list_genres(page_size: Annotated[int, Query(description='Pagination pa
     if not genres:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='genre(s) not found')
 
-    genres = sorted(genres, key=lambda x: x.name)
+    genres: list[Genre] = sorted(genres, key=lambda x: x.name)
 
     return genres
 
