@@ -8,4 +8,4 @@
 # Ссылки:
 1) API проекта **http://0.0.0.0:8000/api/openapi**
 2) GitHub **ETL** **https://github.com/EsterTar/admin_panel_sprint_3/**
-3) GitHub **проекта**  **...**
+3) GitHub **проекта**  **https://github.com/Fox13th/4_sprint_async_api.git**

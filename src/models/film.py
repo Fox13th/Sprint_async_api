@@ -29,3 +29,4 @@ class Film(FilmMainData):
     actors: List[PersonMainData]
     writers: List[PersonMainData]
     creation_date: Optional[datetime] = None
+      

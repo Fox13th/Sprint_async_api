@@ -9,7 +9,6 @@ from services.film import FilmService, get_film_service
 router = APIRouter()
 
 
-@router.get('/', response_model=List[FilmMainData])
 async def popular_films(sort: Optional[str] = '-imdb_rating', genre: Optional[str] = None,
                         page_size: int = Query(ge=1, le=100, default=50),
                         page_number: int = Query(ge=1, default=1),
@@ -36,7 +35,7 @@ async def search_films(query: str, page_size: int = Query(ge=1, le=100, default=
                        film_service: FilmService = Depends(get_film_service)) -> List[FilmMainData]:
     """
     Поиск по фильмам.
-    Пример запроса: http://127.0.0.1:8000/api/v1/films/search?query=star&page_number=1&page_size=50
+    Пример запроса: http://127.0.0.1:8000/api/v1/films/search/?query=star&page_number=1&page_size=50
     :param query: Поисковое слово
     :param page_size: количество найденных фильмов на странице
     :param page_number: номер страницы
