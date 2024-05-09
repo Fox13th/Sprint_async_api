@@ -1,21 +1,28 @@
 import os
+from functools import lru_cache
 from logging import config as logging_config
+
+from pydantic import Field
+from pydantic_settings import BaseSettings
 
 from core.logger import LOGGING
 
-# Применяем настройки логирования
-logging_config.dictConfig(LOGGING)
 
-# Название проекта. Используется в Swagger-документации
-PROJECT_NAME = os.getenv('PROJECT_NAME', 'movies')
+class Settings(BaseSettings):
+    project_name: str = 'movies'
+    redis_host: str = "127.0.0.1"
+    redis_port: int = 6379
+    elastic_host: str = Field("127.0.0.1", alias='ES_HOST')
+    elastic_port: int = Field(9200, alias='ES_INTERNAL_PORT')
+    base_dir: str = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    logging_config.dictConfig(LOGGING)
 
-# Настройки Redis
-REDIS_HOST = os.getenv('REDIS_HOST', '127.0.0.1')
-REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
+    class Config:
+        env_file = ".example.env"
+        extra = "ignore"
 
-# Настройки Elasticsearch
-ELASTIC_HOST = os.getenv('ELASTIC_HOST', '127.0.0.1')
-ELASTIC_PORT = int(os.getenv('ELASTIC_PORT', 9200))
 
-# Корень проекта
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+@lru_cache(maxsize=None)
+def get_settings():
+    """Получаем настройки приложения, сохраняя в кэш."""
+    return Settings()
