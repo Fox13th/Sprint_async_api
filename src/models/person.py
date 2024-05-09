@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from models.film import ModelMainData
+from models.common import BaseOrjsonModel
 
 
 class PersonFilm(BaseModel):
@@ -9,5 +9,10 @@ class PersonFilm(BaseModel):
     imdb_rating: float
 
 
-class Person(ModelMainData):
+class PersonBaseData(BaseOrjsonModel):
+    id: str
+    name: str
+
+
+class Person(PersonBaseData):
     films: list[PersonFilm]
