@@ -16,6 +16,7 @@ async def persons(
         person_service: PersonService = Depends(get_person_service)
 ) -> list[Person]:
     """Получить список всех persons."""
+
     persons_list = await person_service.get_list(
         page_number=page_number,
         page_size=page_size
@@ -26,7 +27,7 @@ async def persons(
     return persons_list
 
 
-@router.get('/search/', response_model=list[Person])
+@router.get('/search', response_model=list[Person])
 async def persons_search(
         page_number: Annotated[int, Query(description='Page number', ge=1, default=1)] = 1,
         page_size: Annotated[int, Query(description='Pagination page size', ge=1, default=10)] = 10,
@@ -34,6 +35,7 @@ async def persons_search(
         person_service: PersonService = Depends(get_person_service)
 ) -> list[Person]:
     """Поиск persons по запросу."""
+
     persons_list = await person_service.get_list(
         page_number=page_number,
         page_size=page_size,
@@ -51,6 +53,7 @@ async def person_details(
         person_service: PersonService = Depends(get_person_service)
 ) -> Person:
     """Получить полную информацию о person."""
+
     person = await person_service.get_by_id(person_id)
     if not person:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='person not found')
@@ -64,6 +67,7 @@ async def person_details(
         person_service: PersonService = Depends(get_person_service)
 ) -> list[PersonFilm]:
     """Получить список всех фильмов, в которых принимал участие person {person_id}."""
+
     person = await person_service.get_by_id(person_id)
     if not person:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='person not found')
