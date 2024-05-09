@@ -1,17 +1,14 @@
-import asyncio
-
 import pytest
 from fastapi.testclient import TestClient
+from main import app, lifespan
+import pytest_asyncio
 
-import main
-from main import app
 
-
-@pytest.fixture
-def client():
-    client = TestClient(app)
-    asyncio.run(main.startup())
-    yield client
+@pytest_asyncio.fixture
+async def client():
+    async with lifespan(app=app):
+        with TestClient(app) as test_client:
+            yield test_client
 
 
 @pytest.mark.persons
