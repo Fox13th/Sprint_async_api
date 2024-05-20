@@ -19,15 +19,14 @@ class FilmService(DataCache):
                        sort_by: str = None, genre: str = None) -> Film | None:
 
         film_cache = f'f_{film_id}{query}{n_elem}{page}{sort_by}{genre}'
-        print(film_cache)
 
-        # film = await self._film_from_cache(film_cache)
-        film = None
+        film = await self._film_from_cache(film_cache)
+
         if not film:
             film = await self._get_film_from_elastic(film_id, query, n_elem, page, sort_by, genre)
             if not film:
                 return None
-            print(film)
+
             await self._put_film_to_cache(film, film_cache)
 
         return film

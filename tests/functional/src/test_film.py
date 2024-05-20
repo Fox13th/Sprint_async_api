@@ -14,9 +14,9 @@ from functional.testdata.es_data import get_es_data
         ),
         # Вывести конкретное кино
         (
-                get_es_data('search'),
-                {'id': ''},
-                {'status': 200, 'length': 50, 'errors': 0}
+                get_es_data('film_by_id'),
+                {'id': '5ghd9bf5-0d90-4353-88ba-4ccc5d2c07ff'},
+                {'status': 200, 'length': 9, 'errors': 0}
         ),
         # Тест на валидность
         (
@@ -29,9 +29,9 @@ from functional.testdata.es_data import get_es_data
 @pytest.mark.asyncio
 async def test_search(make_get_request, es_write_data, valid_data, es_data: list[dict], query_data: dict,
                       expected_answer: dict):
-    insert_data, errors = await valid_data(es_data)
+    insert_data, errors = await valid_data(es_data, 'movies')
 
-    await es_write_data(insert_data)
+    await es_write_data(insert_data, 'movies')
 
     response = await make_get_request(f"/api/v1/films/{query_data['id']}", None)
 

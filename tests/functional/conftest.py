@@ -9,18 +9,23 @@ from elasticsearch import AsyncElasticsearch
 from elasticsearch.helpers import async_bulk
 
 from .settings import test_settings
-from src.models.film import Film
+
+from .models.film import Film
+from .models.genre import Genre
 
 
 @pytest_asyncio.fixture(name='valid_data')
 def valid_data():
-    async def inner(es_data: list[dict]):
+    async def inner(es_data: list[dict], model_idx):
         bulk_query: list[dict] = []
         count_err = 0
         for row in es_data:
             try:
-                Film(**row)
-                data = {'_index': test_settings.es_index, '_id': row['id']}
+                if model_idx == 'genres':
+                    Genre(**row)
+                else:
+                    Film(**row)
+                data = {'_index': model_idx, '_id': row['id']}
                 data.update({'_source': row})
                 bulk_query.append(data)
             except ValueError as err:
@@ -54,13 +59,22 @@ async def es_data():
 
 @pytest_asyncio.fixture(name='es_write_data')
 def es_write_data(es_client):
-    async def inner(es_data: list[dict]):
+    async def inner(es_data: list[dict], es_index):
 
-        if await es_client.indices.exists(index=test_settings.es_index):
-            await es_client.indices.delete(index=test_settings.es_index)
-        await es_client.indices.create(index=test_settings.es_index,
+        if await es_client.indices.exists(index=es_index):
+            await es_client.indices.delete(index=es_index)
+
+        if es_index == 'movies':
+            mapping = test_settings.es_index_mapping
+        else:
+            mapping = test_settings.g_es_index_mapping
+
+        print(es_index)
+
+        res = await es_client.indices.create(index=es_index,
                                        settings=test_settings.es_index_setting,
-                                       mappings=test_settings.es_index_mapping)
+                                       mappings=mapping)
+        print(res)
 
         updated, errors = await async_bulk(client=es_client, actions=es_data)
 

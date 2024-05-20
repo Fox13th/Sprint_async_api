@@ -43,7 +43,7 @@ def get_es_data(test_for: str):
                            {"id": "d9f1ecbd-98b7-4aa4-a82e-da87cdb12b8e", "name": "Jean Gilpin"}],
                 "writers": []
             }]
-        case _:
+        case "film_by_id":
             es_data = [{
                 "id": '5ghd9bf5-0d90-4353-88ba-4ccc5d2c07ff',
                 "imdb_rating": 6.1,
@@ -61,5 +61,43 @@ def get_es_data(test_for: str):
                            {"id": "5237aac5-f652-4aa5-9061-55bb007cd7be", "name": "Tom Kane"},
                            {"id": "d9f1ecbd-98b7-4aa4-a82e-da87cdb12b8e", "name": "Jean Gilpin"}],
                 "writers": []
-            } for _ in range(50)]
+            }]
+        case 'list_genres':
+            es_data = [{
+                "id": str(uuid.uuid4()),
+                "name": "Action",
+                "description": None,
+                "films": [
+                    {
+                        "id": "00af52ec-9345-4d66-adbe-50eb917f463a",
+                        "title": "Star Slammer"
+                    },
+                ]
+            } for _ in range(10)]
+        case 'genres_by_id':
+            es_data = [{
+                "id": "3d8d9bf5-0d90-4353-88ba-4ccc5d2c07ff",
+                "name": "Action",
+                "description": None,
+                "films": [
+                    {
+                        "id": "00af52ec-9345-4d66-adbe-50eb917f463a",
+                        "title": "Star Slammer"
+                    },
+                ]
+            }]
+
+        case 'genres_valid':
+            es_data = [{
+                "id": "3d8d9bf5-0d90-4353-88ba-4ccc5d2c07ff",
+                "name": 1,
+                "description": None,
+                "films": [
+                    {
+                        "id": "00af52ec-9345-4d66-adbe-50eb917f463a",
+                        "title": "Star Slammer"
+                    },
+                ]
+            }]
+
     return es_data

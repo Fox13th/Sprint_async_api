@@ -1,6 +1,6 @@
 from pydantic import Field
 from pydantic_settings import BaseSettings
-from .testdata.es_mapping import settings, mappings
+from .testdata.es_mapping import settings, mappings, mappings_genre
 
 
 class TestSettings(BaseSettings):
@@ -9,6 +9,7 @@ class TestSettings(BaseSettings):
     #es_id_field: str = ''
     es_index_mapping: dict = mappings
     es_index_setting: dict = settings
+    g_es_index_mapping: dict = mappings_genre
 
     redis_host: str = '127.0.0.1'
     service_url: str = Field('http://127.0.0.1:8000')
