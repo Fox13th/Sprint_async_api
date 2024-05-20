@@ -9,6 +9,26 @@ from elasticsearch import AsyncElasticsearch
 from elasticsearch.helpers import async_bulk
 
 from .settings import test_settings
+from src.models.film import Film
+
+
+@pytest_asyncio.fixture(name='valid_data')
+def valid_data():
+    async def inner(es_data: list[dict]):
+        bulk_query: list[dict] = []
+        count_err = 0
+        for row in es_data:
+            try:
+                Film(**row)
+                data = {'_index': test_settings.es_index, '_id': row['id']}
+                data.update({'_source': row})
+                bulk_query.append(data)
+            except ValueError as err:
+                i_err = str(err).split(' ')
+                count_err = int(i_err[0])
+        return bulk_query, count_err
+
+    return inner
 
 
 @pytest_asyncio.fixture(scope='session')
