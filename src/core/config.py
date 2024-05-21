@@ -10,9 +10,9 @@ from core.logger import LOGGING
 
 class Settings(BaseSettings):
     project_name: str = 'movies'
-    redis_host: str = ...
+    redis_host: str = '127.0.0.1'
     redis_port: int = 6379
-    elastic_host: str = Field(..., alias='ES_HOST')
+    elastic_host: str = Field('http://127.0.0.1', alias='ES_HOST')
     elastic_port: int = Field(9200, alias='ES_INTERNAL_PORT')
     base_dir: str = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     logging_config.dictConfig(LOGGING)
