@@ -19,6 +19,7 @@ class FilmService(DataCache):
                        sort_by: str = None, genre: str = None) -> Film | list[Film] | None:
 
         film_cache = f'f_{film_id}{query}{n_elem}{page}{sort_by}{genre}'
+
         film = await self._film_from_cache(film_cache)
 
         if not film:
@@ -48,7 +49,6 @@ class FilmService(DataCache):
                         }
                     },
                 }
-
             else:
                 order = 'asc'
                 if sort_by[0] == '-':
