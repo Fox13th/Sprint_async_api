@@ -1,6 +1,4 @@
 import asyncio
-import uuid
-from asyncio import sleep
 
 import aiohttp
 import pytest_asyncio
@@ -8,10 +6,9 @@ from elasticsearch import AsyncElasticsearch
 
 from elasticsearch.helpers import async_bulk
 
-from .settings import test_settings
-
-from .models.film import Film
-from .models.genre import Genre
+from tests.functional.settings import test_settings
+from functional.models.film import Film
+from functional.models.genre import Genre
 
 
 @pytest_asyncio.fixture(name='valid_data')
@@ -69,9 +66,13 @@ def es_write_data(es_client):
         else:
             mapping = test_settings.g_es_index_mapping
 
-        await es_client.indices.create(index=es_index,
-                                       settings=test_settings.es_index_setting,
-                                       mappings=mapping)
+        await es_client.indices.create(
+            index=es_index,
+            body={
+                "settings": test_settings.es_index_setting,
+                "mappings": mapping
+            }
+        )
 
         updated, errors = await async_bulk(client=es_client, actions=es_data, refresh=True)
 

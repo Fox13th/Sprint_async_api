@@ -131,4 +131,5 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
-/tests/.example.env
+/tests/functional/.example.env
+/tests/functional/models/
