@@ -26,7 +26,7 @@ def get_es_data(test_for: str):
             } for _ in range(50)]
         case 'search_valid':
             es_data = [{
-                "id": str(uuid.uuid4()),
+                "id": "3d8d9bf5-13ed-4353-88ba-4ccc5d2c07ff",
                 "imdb_rating": 'qwerty',
                 "genres": [{"id": "3d8d9bf5-0d90-4353-88ba-4ccc5d2c07ff", "name": "Action"},
                            {"id": "6c162475-c7ed-4461-9184-001ef3d9f26e", "name": "Sci-Fi"}],

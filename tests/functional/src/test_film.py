@@ -22,12 +22,12 @@ from functional.testdata.es_data import get_es_data
         (
                 get_es_data('search_valid'),
                 {'id': ''},
-                {'status': 404, 'length': 1, 'errors': 2}
+                {'status': 404, 'length': 1, 'errors': 1}
         )
     ]
 )
 @pytest.mark.asyncio
-async def test_search(make_get_request, es_write_data, valid_data, es_data: list[dict], query_data: dict,
+async def test_films(make_get_request, es_write_data, valid_data, es_data: list[dict], query_data: dict,
                       expected_answer: dict):
     insert_data, errors = await valid_data(es_data, 'movies')
 

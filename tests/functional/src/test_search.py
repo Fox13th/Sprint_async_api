@@ -22,7 +22,7 @@ from functional.testdata.es_data import get_es_data
                 'films',
                 get_es_data('search_valid'),
                 {'query': 'star'},
-                {'status': 404, 'length': 1, 'errors': 2}
+                {'status': 404, 'length': 1, 'errors': 1}
         )
     ]
 )
