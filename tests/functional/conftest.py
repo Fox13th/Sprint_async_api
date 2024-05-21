@@ -4,9 +4,11 @@ from asyncio import sleep
 
 import aiohttp
 import pytest_asyncio
+import redis
 from elasticsearch import AsyncElasticsearch
 
 from elasticsearch.helpers import async_bulk
+from redis.asyncio.client import Redis
 
 from .settings import test_settings
 
@@ -50,19 +52,20 @@ async def es_client():
     await es_client.close()
 
 
-@pytest_asyncio.fixture(name='es_data')
-async def es_data():
-    es_client = AsyncElasticsearch(hosts=test_settings.es_host, verify_certs=False)
-    yield es_client
-    await es_client.close()
+@pytest_asyncio.fixture(name='redis_cl', scope='session')
+async def redis_cl():
+    redis_conn = Redis(host=test_settings.redis_host, socket_connect_timeout=1)
+    yield redis_conn
+    await redis_conn.close()
 
 
 @pytest_asyncio.fixture(name='es_write_data')
-def es_write_data(es_client):
+def es_write_data(es_client, redis_cl):
     async def inner(es_data: list[dict], es_index):
 
         if await es_client.indices.exists(index=es_index):
             await es_client.indices.delete(index=es_index)
+            await redis_cl.flushdb()
 
         if es_index == 'movies':
             mapping = test_settings.es_index_mapping
