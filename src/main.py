@@ -19,7 +19,7 @@ async def lifespan(app: FastAPI):
     Recommended to use "lifespan"."""
     # startup
     redis_db.redis = Redis(host=settings.redis_host, port=settings.redis_port)
-    elastic.es = AsyncElasticsearch(hosts=[f'{settings.elastic_host}:{settings.elastic_port}'])
+    elastic.es = AsyncElasticsearch(hosts=[f'{settings.elastic_host}:{settings.elastic_port}'], max_retries=0)
     yield
 
     # shutdown

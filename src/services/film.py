@@ -1,5 +1,8 @@
 from functools import lru_cache
 
+import aiohttp
+import elasticsearch
+import redis
 from elasticsearch import AsyncElasticsearch, NotFoundError
 from fastapi import Depends
 
@@ -7,14 +10,19 @@ from db.elastic import get_elastic
 from db.redis_db import DataCache
 from models.film import Film, FilmMainData
 
+from src.services.backoff_decorator import backoff
+
 
 class FilmService(DataCache):
-    def __init__(self, elastic: AsyncElasticsearch):
+    def __init__(self, elastic: AsyncElasticsearch()):
         DataCache.__init__(self, Film, FilmMainData)
 
         self.elastic = elastic
         self.idx = 'movies'
 
+    @backoff((elasticsearch.exceptions.ConnectionError,
+              aiohttp.client_exceptions.ClientConnectorError,
+              redis.exceptions.ConnectionError), 1, 2, 100, 10)
     async def get_film(self, film_id: str = None, query: str = None, n_elem: int = 100, page: int = 1,
                        sort_by: str = None, genre: str = None) -> Film | list[Film] | None:
 
