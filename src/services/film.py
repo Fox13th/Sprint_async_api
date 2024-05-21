@@ -1,20 +1,17 @@
 from functools import lru_cache
 
-import orjson
 from elasticsearch import AsyncElasticsearch, NotFoundError
 from fastapi import Depends
-from redis.asyncio import Redis
 
 from db.elastic import get_elastic
-from db.redis_db import get_redis
+from db.redis_db import DataCache
 from models.film import Film, FilmMainData
 
-FILM_CACHE_EXPIRE_IN_SECONDS = 60 * 5  # 5 минут
 
+class FilmService(DataCache):
+    def __init__(self, elastic: AsyncElasticsearch):
+        DataCache.__init__(self, Film, FilmMainData)
 
-class FilmService:
-    def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
-        self.redis = redis
         self.elastic = elastic
         self.idx = 'movies'
 
@@ -94,31 +91,9 @@ class FilmService:
 
         return res
 
-    async def _film_from_cache(self, key_cache: str) -> Film | None:
-
-        data = await self.redis.get(key_cache)
-        if not data:
-            return None
-
-        try:
-            film = Film.parse_raw(data)
-        except ValueError:
-            film = [FilmMainData.parse_raw(f_data) for f_data in orjson.loads(data)]
-
-        return film
-
-    async def _put_film_to_cache(self, film, key_cache: str):
-
-        if type(film) == list:
-            f_list = [f_data.json() for f_data in film]
-            await self.redis.set(key_cache, orjson.dumps(f_list), FILM_CACHE_EXPIRE_IN_SECONDS)
-        else:
-            await self.redis.set(key_cache, film.json(), FILM_CACHE_EXPIRE_IN_SECONDS)
-
 
 @lru_cache()
 def get_film_service(
-        redis: Redis = Depends(get_redis),
         elastic: AsyncElasticsearch = Depends(get_elastic),
 ) -> FilmService:
-    return FilmService(redis, elastic)
+    return FilmService(elastic)

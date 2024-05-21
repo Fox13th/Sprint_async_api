@@ -2,31 +2,28 @@ from functools import lru_cache
 
 from elasticsearch import AsyncElasticsearch, NotFoundError
 from fastapi import Depends
-from orjson import orjson
-from redis.asyncio import Redis
 
 from db.elastic import get_elastic
-from db.redis_db import get_redis
+from db.redis_db import DataCache
 from models.person import Person
 
-PERSON_CACHE_EXPIRE_IN_SECONDS = 60 * 5
 
+class PersonService(DataCache):
+    def __init__(self, elastic: AsyncElasticsearch):
+        DataCache.__init__(self, Person, )
 
-class PersonService:
-    def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
-        self.redis = redis
         self.elastic = elastic
         self.index = 'persons'
 
     async def get_by_id(self, person_id: str) -> Person | None:
 
         person_cache = f'p_{person_id}'
-        person = await self._person_from_cache(person_cache)
+        person = await self._film_from_cache(person_cache)
         if not person:
             person = await self._get_person_from_elastic(person_id)
             if not person:
                 return None
-            await self._put_person_to_cache(person, person_cache)
+            await self._put_film_to_cache(person, person_cache)
 
         return person
 
@@ -38,7 +35,7 @@ class PersonService:
     ) -> list[Person] | None:
 
         person_cache = f'p_{page_number}{page_size}{query}'
-        person = await self._person_from_cache(person_cache)
+        person = await self._film_from_cache(person_cache)
         if not person:
             if not query:
                 body = {
@@ -65,7 +62,7 @@ class PersonService:
             )
 
             person = [Person(**doc['_source']) for doc in docs['hits']['hits']]
-            await self._put_person_to_cache(person, person_cache)
+            await self._put_film_to_cache(person, person_cache)
 
         return person
 
@@ -76,29 +73,9 @@ class PersonService:
             return None
         return Person(**doc['_source'])
 
-    async def _person_from_cache(self, key_cache: str) -> Person | None:
-        data = await self.redis.get(key_cache)
-        if not data:
-            return None
-
-        try:
-            person = Person.parse_raw(data)
-        except ValueError:
-            person = [Person.parse_raw(f_data) for f_data in orjson.loads(data)]
-
-        return person
-
-    async def _put_person_to_cache(self, person, key_cache):
-        if type(person) == list:
-            g_list = [p_data.json() for p_data in person]
-            await self.redis.set(key_cache, orjson.dumps(g_list), PERSON_CACHE_EXPIRE_IN_SECONDS)
-        else:
-            await self.redis.set(key_cache, person.json(), PERSON_CACHE_EXPIRE_IN_SECONDS)
-
 
 @lru_cache()
 def get_person_service(
-        redis: Redis = Depends(get_redis),
         elastic: AsyncElasticsearch = Depends(get_elastic),
 ) -> PersonService:
-    return PersonService(redis, elastic)
+    return PersonService(elastic)
