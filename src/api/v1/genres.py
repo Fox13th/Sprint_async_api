@@ -18,6 +18,7 @@ async def list_genres(
     """
     Вывод списка жанров
     Пример запроса: http://127.0.0.1:8000/api/v1/genres
+    :param genre_service:
     :param page_size: Количество элементов на странице
     :param page_number: Номер страницы
     """
@@ -34,10 +35,14 @@ async def list_genres(
 
 # Получить жанр по id
 @router.get('/{genre_id}', response_model=Genre)
-async def genre_details(genre_id: str, genre_service: GenreService = Depends(get_genre_service)) -> Genre:
+async def genre_details(
+        genre_id: str,
+        genre_service: GenreService = Depends(get_genre_service)
+) -> Genre:
     """
     Вывод жанра по id.
     Пример запроса: http://127.0.0.1:8000/api/v1/genres/5373d043-3f41-4ea8-9947-4b746c601bbd
+    :param genre_service:
     :param genre_id: id кинофильма
     """
 
@@ -45,4 +50,4 @@ async def genre_details(genre_id: str, genre_service: GenreService = Depends(get
     if not genre:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='genre not found')
 
-    return Genre(id=genre.id, name=genre.name, title=genre.description, films=genre.films)
+    return genre
