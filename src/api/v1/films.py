@@ -9,7 +9,13 @@ from services.film import FilmService, get_film_service
 router = APIRouter()
 
 
-@router.get('/', response_model=list[FilmMainData])
+@router.get('/',
+            response_model=list[FilmMainData],
+            summary='Вывод популярных фильмов',
+            description='Получение списка кинопроизведений согласно их рейтингу',
+            response_description="Название и рейтинг фильма",
+            tags=['Вывод всех кинопроизведений']
+            )
 async def popular_films(
         sort: str | None = '-imdb_rating',
         genre: str | None = None,
@@ -33,7 +39,13 @@ async def popular_films(
     return films
 
 
-@router.get('/search/', response_model=list[FilmMainData])
+@router.get('/search/',
+            response_model=list[FilmMainData],
+            summary='Поиск по фильмам',
+            description='Осуществляется поиск кино по его названию',
+            response_description="Название и рейтинг фильма",
+            tags=['Полнотекстовой поиск']
+            )
 async def search_films(
         query: str,
         page_size: Annotated[int, Query(description='Pagination page size', ge=1)] = 50,
@@ -56,7 +68,14 @@ async def search_films(
 
 
 # Получить кино по id
-@router.get('/{film_id}', response_model=Film)
+@router.get('/{film_id}',
+            response_model=Film,
+            summary='Поиск конкретного кинопроизведения',
+            description='Осуществляется поиск кино по его уникальному идентификатору',
+            response_description="Название, рейтинг, описание, жанр, съемочная команда фильма",
+            tags=['Поиск по id']
+
+            )
 async def film_details(film_id: str, film_service: FilmService = Depends(get_film_service)) -> Film:
     """
     Вывод кино по id.

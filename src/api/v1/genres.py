@@ -9,7 +9,13 @@ from models.genre import Genre
 router = APIRouter()
 
 
-@router.get('/', response_model=list[Genre])
+@router.get('/',
+            response_model=list[Genre],
+            summary='Вывод всех жанров',
+            description='Осуществляется вывод всех известных жанров',
+            response_description="Название, описание и свящанные фильмы",
+            tags=['Общий вывод']
+            )
 async def list_genres(
         page_size: Annotated[int, Query(description='Pagination page size', ge=1)] = 50,
         page_number: Annotated[int, Query(description='Page number', ge=1)] = 1,
@@ -33,7 +39,13 @@ async def list_genres(
 
 
 # Получить жанр по id
-@router.get('/{genre_id}', response_model=Genre)
+@router.get('/{genre_id}',
+            response_model=Genre,
+            summary='Вывод жанра',
+            description='Вывод конкретного жанра по его уникальному идентификатору',
+            response_description="Название, описание и связанные фильмы",
+            tags=['Вывод по id']
+            )
 async def genre_details(genre_id: str, genre_service: GenreService = Depends(get_genre_service)) -> Genre:
     """
     Вывод жанра по id.
