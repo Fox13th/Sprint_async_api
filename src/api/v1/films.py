@@ -19,8 +19,8 @@ router = APIRouter()
 async def popular_films(
         sort: str | None = '-imdb_rating',
         genre: str | None = None,
-        page_size: Annotated[int, Query(description='Pagination page size', ge=1)] = 50,
-        page_number: Annotated[int, Query(description='Page number', ge=1)] = 1,
+        page_size: Annotated[int, Query(description='Количество элементов на странице', ge=1)] = 50,
+        page_number: Annotated[int, Query(description='Номер страницы', ge=1)] = 1,
         film_service: FilmService = Depends(get_film_service)
 ) -> list[FilmMainData]:
     """
@@ -48,8 +48,8 @@ async def popular_films(
             )
 async def search_films(
         query: str,
-        page_size: Annotated[int, Query(description='Pagination page size', ge=1)] = 50,
-        page_number: Annotated[int, Query(description='Page number', ge=1)] = 1,
+        page_size: Annotated[int, Query(description='Количество элементов на странице', ge=1)] = 50,
+        page_number: Annotated[int, Query(description='Номер страницы', ge=1)] = 1,
         film_service: FilmService = Depends(get_film_service)
 ) -> list[FilmMainData]:
     """
@@ -74,7 +74,6 @@ async def search_films(
             description='Осуществляется поиск кино по его уникальному идентификатору',
             response_description="Название, рейтинг, описание, жанр, съемочная команда фильма",
             tags=['Поиск по id']
-
             )
 async def film_details(film_id: str, film_service: FilmService = Depends(get_film_service)) -> Film:
     """

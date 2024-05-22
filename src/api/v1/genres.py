@@ -13,12 +13,12 @@ router = APIRouter()
             response_model=list[Genre],
             summary='Вывод всех жанров',
             description='Осуществляется вывод всех известных жанров',
-            response_description="Название, описание и свящанные фильмы",
+            response_description="Название, описание и связанные фильмы",
             tags=['Общий вывод']
             )
 async def list_genres(
-        page_size: Annotated[int, Query(description='Pagination page size', ge=1)] = 50,
-        page_number: Annotated[int, Query(description='Page number', ge=1)] = 1,
+        page_size: Annotated[int, Query(description='Количество элементов на странице', ge=1)] = 50,
+        page_number: Annotated[int, Query(description='Номер страницы', ge=1)] = 1,
         genre_service: GenreService = Depends(get_genre_service)
 ) -> list[Genre]:
     """
