@@ -1,11 +1,14 @@
 from functools import lru_cache
 
-from elasticsearch import AsyncElasticsearch, NotFoundError
+from aiohttp import ClientConnectorError
+from elasticsearch import AsyncElasticsearch, NotFoundError, exceptions
 from fastapi import Depends
 
 from db.elastic import get_elastic
 from db.redis_db import DataCache
 from models.person import Person
+
+from src.db.backoff_decorator import backoff
 
 
 class PersonService(DataCache):
@@ -15,6 +18,7 @@ class PersonService(DataCache):
         self.elastic = elastic
         self.index = 'persons'
 
+    @backoff((exceptions.ConnectionError, ClientConnectorError), 1, 2, 100, 10)
     async def get_by_id(self, person_id: str) -> Person | None:
 
         person_cache = f'p_{person_id}'
@@ -27,6 +31,7 @@ class PersonService(DataCache):
 
         return person
 
+    @backoff((exceptions.ConnectionError, ClientConnectorError), 1, 2, 100, 10)
     async def get_list(
             self,
             page_number: int = 1,
@@ -66,6 +71,7 @@ class PersonService(DataCache):
 
         return person
 
+    @backoff((exceptions.ConnectionError, ClientConnectorError), 1, 2, 100, 10)
     async def _get_person_from_elastic(self, person_id: str) -> Person | None:
         try:
             doc = await self.elastic.get(index=self.index, id=person_id)

@@ -1,5 +1,8 @@
 import orjson
 from redis.asyncio import Redis
+from redis.exceptions import ConnectionError
+
+from src.db.backoff_decorator import backoff
 
 redis: Redis | None = None
 
@@ -17,6 +20,7 @@ class DataCache:
         else:
             self.main_data_model = data_model
 
+    @backoff((ConnectionError), 1, 2, 100, 10)
     async def _film_from_cache(self, key_cache: str):
 
         data = await self.redis.get(key_cache)
@@ -30,6 +34,7 @@ class DataCache:
 
         return film
 
+    @backoff((ConnectionError), 1, 2, 100, 10)
     async def _put_film_to_cache(self, film, key_cache: str):
 
         if type(film) == list:

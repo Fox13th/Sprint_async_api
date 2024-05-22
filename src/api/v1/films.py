@@ -74,6 +74,7 @@ async def search_films(
             description='Осуществляется поиск кино по его уникальному идентификатору',
             response_description="Название, рейтинг, описание, жанр, съемочная команда фильма",
             tags=['Поиск по id']
+
             )
 async def film_details(film_id: str, film_service: FilmService = Depends(get_film_service)) -> Film:
     """
