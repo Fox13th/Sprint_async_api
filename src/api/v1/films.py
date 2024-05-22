@@ -11,10 +11,10 @@ router = APIRouter()
 
 @router.get('/',
             response_model=list[FilmMainData],
-            summary='Вывод популярных фильмов',
+            summary='Вывод всех кинопроизведений по рейтингу',
             description='Получение списка кинопроизведений согласно их рейтингу',
             response_description="Название и рейтинг фильма",
-            tags=['Вывод всех кинопроизведений']
+            tags=['Общий вывод']
             )
 async def popular_films(
         sort: str | None = '-imdb_rating',
@@ -74,7 +74,6 @@ async def search_films(
             description='Осуществляется поиск кино по его уникальному идентификатору',
             response_description="Название, рейтинг, описание, жанр, съемочная команда фильма",
             tags=['Поиск по id']
-
             )
 async def film_details(film_id: str, film_service: FilmService = Depends(get_film_service)) -> Film:
     """

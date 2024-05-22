@@ -9,7 +9,13 @@ from services.person import PersonService, get_person_service
 router = APIRouter()
 
 
-@router.get('/', response_model=list[Person])
+@router.get('/',
+            response_model=list[Person],
+            summary='Вывод всех участников съемочной группы',
+            description='Осуществляется вывод всех персоналий',
+            response_description='Имя и кинопроизведения',
+            tags=['Общий вывод']
+            )
 async def persons(
         page_number: Annotated[int, Query(description='Page number', ge=1)] = 1,
         page_size: Annotated[int, Query(description='Pagination page size', ge=1)] = 10,
@@ -27,7 +33,13 @@ async def persons(
     return persons_list
 
 
-@router.get('/search', response_model=list[Person])
+@router.get('/search',
+            response_model=list[Person],
+            summary='Поиск участника кинопроизведения',
+            description='Осуществляется поиск кино по его уникальному идентификатору',
+            response_description='Имя и кинопроизведения',
+            tags=['Полнотекстовой поиск']
+            )
 async def persons_search(
         page_number: Annotated[int, Query(description='Page number', ge=1)] = 1,
         page_size: Annotated[int, Query(description='Pagination page size', ge=1)] = 10,
@@ -47,7 +59,13 @@ async def persons_search(
     return persons_list
 
 
-@router.get('/{person_id}', response_model=Person)
+@router.get('/{person_id}',
+            response_model=Person,
+            summary='Поиск конкретного участника',
+            description='Осуществляется поиск участника по его уникальному идентификатору',
+            response_description='Имя и кинопроизведения',
+            tags=['Поиск по id']
+            )
 async def person_details(
         person_id: str,
         person_service: PersonService = Depends(get_person_service)
@@ -61,7 +79,13 @@ async def person_details(
     return person
 
 
-@router.get('/{person_id}/film/', response_model=list[PersonFilm])
+@router.get('/{person_id}/film/',
+            response_model=list[PersonFilm],
+            summary='Поиск кинопроизведений конкретного участника',
+            description='Осуществляется поиск фильмов участника по его уникальному идентификатору',
+            response_description='Кинопроизведения',
+            tags=['Поиск по id']
+            )
 async def person_details(
         person_id: str,
         person_service: PersonService = Depends(get_person_service)

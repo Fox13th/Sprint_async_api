@@ -41,10 +41,10 @@ async def list_genres(
 # Получить жанр по id
 @router.get('/{genre_id}',
             response_model=Genre,
-            summary='Вывод жанра',
+            summary='Поиск конкретного жанра',
             description='Вывод конкретного жанра по его уникальному идентификатору',
             response_description="Название, описание и связанные фильмы",
-            tags=['Вывод по id']
+            tags=['Поиск по id']
             )
 async def genre_details(genre_id: str, genre_service: GenreService = Depends(get_genre_service)) -> Genre:
     """
