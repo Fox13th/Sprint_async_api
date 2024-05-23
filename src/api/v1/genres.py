@@ -28,7 +28,7 @@ async def list_genres(
     :param page_number: Номер страницы
     """
 
-    genres = await genre_service.get_genre(None, page_size, page_number)
+    genres = await genre_service.get_list(page_size=page_size, page_number=page_number)
 
     if not genres:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='genre(s) not found')
@@ -53,7 +53,7 @@ async def genre_details(genre_id: str, genre_service: GenreService = Depends(get
     :param genre_id: id кинофильма
     """
 
-    genre = await genre_service.get_genre(genre_id)
+    genre = await genre_service.get_by_id(genre_id=genre_id)
     if not genre:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='genre not found')
 

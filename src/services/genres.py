@@ -1,10 +1,9 @@
 from functools import lru_cache
 
 from aiohttp import ClientConnectorError
-from elasticsearch import AsyncElasticsearch, NotFoundError, exceptions
-from fastapi import Depends
+from elasticsearch import exceptions
 
-from db.elastic import get_elastic
+from db.elastic import get_elastic_service
 from db.redis_db import DataCache
 from models.genre import Genre
 
@@ -12,57 +11,46 @@ from src.db.backoff_decorator import backoff
 
 
 class GenreService(DataCache):
-    def __init__(self, elastic: AsyncElasticsearch):
+    def __init__(self):
         DataCache.__init__(self, Genre, )
 
-        self.elastic = elastic
-        self.idx = 'genres'
+        self._elastic_service = get_elastic_service(index='genres', schema=Genre)
 
     @backoff((exceptions.ConnectionError, ClientConnectorError), 1, 2, 100, 10)
-    async def get_genre(self, genre_id: str = None, n_elem: int = 100, page: int = 1) -> Genre | list[Genre] | None:
+    async def get_by_id(self, genre_id: str) -> Genre | None:
+        genre_cache = f'g_{genre_id}'
+        genre = await self.get_from_cache(genre_cache)
+        if genre:
+            return genre
 
-        genre_cache = f'g_{genre_id}{n_elem}{page}'
-        genre = await self._film_from_cache(genre_cache)
-
+        genre = await self._elastic_service.get_one(document_id=genre_id)
         if not genre:
-            genre = await self._get_genre_from_elastic(genre_id, n_elem, page)
-            if not genre:
-                return None
-
-            await self._put_film_to_cache(genre, genre_cache)
-
+            return genre
+        await self.put_to_cache(genre, genre_cache)
         return genre
 
-    async def _get_genre_from_elastic(self, genre_id: str = None, n_elem: int = 50, page: int = 1) -> Genre | None:
-        try:
-            if genre_id:
-                doc = await self.elastic.get(index=self.idx, id=genre_id)
-                return Genre(**doc['_source'])
+    @backoff((exceptions.ConnectionError, ClientConnectorError), 1, 2, 100, 10)
+    async def get_list(
+            self,
+            page_number: int = 1,
+            page_size: int = 50,
+            query: str = None,
+    ) -> list[Genre] | None:
+        genre_cache = f'g_{page_number}{page_size}{query}'
+        genres = await self.get_from_cache(genre_cache)
+        if genres:
+            return genres
 
-            else:
-                body_query = {
-                    'query': {'match_all': {}},
-                }
-
-            doc = await self.elastic.search(
-                index=self.idx,
-                body=body_query,
-                size=n_elem,
-                from_=(page - 1) * n_elem
-            )
-
-            res = list()
-            for i in range(len(doc['hits']['hits'])):
-                res.append(Genre(**doc['hits']['hits'][i]['_source']))
-
-        except NotFoundError:
+        body = {
+            'query': {'match_all': {}},
+        }
+        genres = await self._elastic_service.get_list(body=body, page_number=page_number, page_size=page_size)
+        if not genres:
             return None
-
-        return res
+        await self.put_to_cache(genres, genre_cache)
+        return genres
 
 
 @lru_cache()
-def get_genre_service(
-        elastic: AsyncElasticsearch = Depends(get_elastic),
-) -> GenreService:
-    return GenreService(elastic)
+def get_genre_service() -> GenreService:
+    return GenreService()

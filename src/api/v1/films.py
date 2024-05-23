@@ -32,10 +32,14 @@ async def popular_films(
     :param page_number: Номер страницы
     :param sort: По какому полю сортировать; по умолчанию: '-imdb_rating'
     """
-    films = await film_service.get_film(None, None, page_size, page_number, sort, genre)
+    films = await film_service.get_list(
+        page_number=page_number,
+        page_size=page_size,
+        sort_by=sort,
+        genre=genre
+    )
     if not films:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='film(s) not found')
-
     return films
 
 
@@ -60,7 +64,11 @@ async def search_films(
     :param page_number: номер страницы
     """
 
-    films = await film_service.get_film(None, query, page_size, page_number, )
+    films = await film_service.get_list(
+        query=query,
+        page_size=page_size,
+        page_number=page_number
+    )
     if not films:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='film(s) not found')
 
@@ -82,9 +90,8 @@ async def film_details(film_id: str, film_service: FilmService = Depends(get_fil
                     http://127.0.0.1:8000/api/v1/films/4e5184c8-54eb-4f09-be83-4f95affe42a8
     :param film_id: id кинофильма
     """
-    film = await film_service.get_film(film_id)
+    film = await film_service.get_by_id(film_id=film_id)
     if not film:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='film not found')
 
-    return Film(id=film.id, imdb_rating=film.imdb_rating, title=film.title, description=film.description,
-                genres=film.genres, directors=film.directors, actors=film.actors, writers=film.writers)
+    return film

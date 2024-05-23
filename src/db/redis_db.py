@@ -21,7 +21,7 @@ class DataCache:
             self.main_data_model = data_model
 
     @backoff((ConnectionError), 1, 2, 100, 10)
-    async def _film_from_cache(self, key_cache: str):
+    async def get_from_cache(self, key_cache: str):
 
         data = await self.redis.get(key_cache)
         if not data:
@@ -35,7 +35,7 @@ class DataCache:
         return film
 
     @backoff((ConnectionError), 1, 2, 100, 10)
-    async def _put_film_to_cache(self, film, key_cache: str):
+    async def put_to_cache(self, film, key_cache: str):
 
         if type(film) == list:
             f_list = [f_data.json() for f_data in film]
