@@ -31,8 +31,6 @@ async def test_genre(make_get_request, es_write_data, valid_data, es_data: list[
                       expected_answer: dict):
     insert_data, errors = await valid_data(es_data, 'genres')
 
-    print(insert_data)
-
     await es_write_data(insert_data, 'genres')
 
     response = await make_get_request(f"/api/v1/genres/{query_data['id']}", None)

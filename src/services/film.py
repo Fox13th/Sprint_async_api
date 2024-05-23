@@ -2,32 +2,31 @@ from functools import lru_cache
 
 from elasticsearch import exceptions
 from aiohttp import ClientConnectorError
-from elasticsearch import AsyncElasticsearch, NotFoundError
-from fastapi import Depends
 
 from db.elastic import get_elastic_service
-from db.redis_db import DataCache
+from db.redis_db import get_redis_service
 from models.film import Film, FilmMainData
 
 from db.backoff_decorator import backoff
 
 
-class FilmService(DataCache):
+class FilmService:
+
     def __init__(self):
-        DataCache.__init__(self, Film, FilmMainData)
+        self._redis_service = get_redis_service(data_model=Film, main_data_model=FilmMainData)
         self._elastic_service = get_elastic_service(index='movies', schema=Film)
 
     @backoff((exceptions.ConnectionError, ClientConnectorError), 1, 2, 100, 10)
     async def get_by_id(self, film_id: str) -> Film | None:
         film_cache = f'f_{film_id}'
-        film = await self.get_from_cache(film_cache)
+        film = await self._redis_service.get_from_cache(film_cache)
         if film:
             return film
 
         film = await self._elastic_service.get_one(document_id=film_id)
         if not film:
             return None
-        await self.put_to_cache(film, film_cache)
+        await self._redis_service.put_to_cache(film, film_cache)
         return film
 
     @backoff((exceptions.ConnectionError, ClientConnectorError), 1, 2, 100, 10)
@@ -42,7 +41,7 @@ class FilmService(DataCache):
 
         film_cache = f'f_{query}{page_size}{page_number}{sort_by}{genre}'
 
-        films = await self.get_from_cache(film_cache)
+        films = await self._redis_service.get_from_cache(film_cache)
         if films:
             return films
 
@@ -86,7 +85,7 @@ class FilmService(DataCache):
         films = await self._elastic_service.get_list(body=body, page_number=page_number, page_size=page_size)
         if not films:
             return None
-        await self.put_to_cache(films, film_cache)
+        await self._redis_service.put_to_cache(films, film_cache)
         return films
 
 

@@ -1,4 +1,8 @@
+from functools import lru_cache
+from typing import Type
+
 import orjson
+from pydantic import BaseModel
 from redis.asyncio import Redis
 from redis.exceptions import ConnectionError
 
@@ -42,3 +46,14 @@ class DataCache:
             await self.redis.set(key_cache, orjson.dumps(f_list), DATA_CACHE_EXPIRE_IN_SECONDS)
         else:
             await self.redis.set(key_cache, film.json(), DATA_CACHE_EXPIRE_IN_SECONDS)
+
+
+def get_redis_service(
+        data_model: Type[BaseModel],
+        main_data_model: Type[BaseModel] = None
+):
+    redis_service = DataCache(
+        data_model=data_model,
+        main_data_model=main_data_model
+    )
+    return redis_service

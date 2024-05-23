@@ -37,11 +37,8 @@ async def test_person(
 ):
     insert_data, errors = await valid_data(es_data, 'persons')
 
-    print('insert_data:', insert_data)
-
     await es_write_data(insert_data, 'persons')
 
-    print('url:', f"/api/v1/persons/{query_data['id']}")
     response = await make_get_request(f"/api/v1/persons/{query_data['id']}", None)
 
     assert errors == expected_answer['errors']

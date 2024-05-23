@@ -5,7 +5,6 @@ import os
 
 
 class TestSettings(BaseSettings):
-    # es_host: str = Field('http://127.0.0.1:9200', os.getenv('ELASTIC_HOST'))
     es_host: str = os.getenv("ELASTIC_HOST", "http://elasticsearch")
     es_index: str = 'movies'
 

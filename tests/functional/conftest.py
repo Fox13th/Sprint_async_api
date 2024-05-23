@@ -105,7 +105,6 @@ def make_get_request(cl_session):
             body = await response.json()
             headers = response.headers
             status = response.status
-            print(str(status))
         res = {'status': status, 'body': body}
         return res
 
