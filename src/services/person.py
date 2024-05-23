@@ -7,7 +7,7 @@ from db.elastic import get_elastic_service
 from db.redis_db import DataCache
 from models.person import Person
 
-from src.db.backoff_decorator import backoff
+from db.backoff_decorator import backoff
 
 
 class PersonService(DataCache):

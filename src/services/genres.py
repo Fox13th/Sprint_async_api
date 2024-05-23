@@ -7,7 +7,7 @@ from db.elastic import get_elastic_service
 from db.redis_db import DataCache
 from models.genre import Genre
 
-from src.db.backoff_decorator import backoff
+from db.backoff_decorator import backoff
 
 
 class GenreService(DataCache):

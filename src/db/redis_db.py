@@ -2,7 +2,7 @@ import orjson
 from redis.asyncio import Redis
 from redis.exceptions import ConnectionError
 
-from src.db.backoff_decorator import backoff
+from db.backoff_decorator import backoff
 
 redis: Redis | None = None
 

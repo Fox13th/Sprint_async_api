@@ -9,7 +9,7 @@ from db.elastic import get_elastic_service
 from db.redis_db import DataCache
 from models.film import Film, FilmMainData
 
-from src.db.backoff_decorator import backoff
+from db.backoff_decorator import backoff
 
 
 class FilmService(DataCache):

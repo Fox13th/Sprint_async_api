@@ -1,10 +1,10 @@
-from functools import lru_cache
 from typing import Type
+from elasticsearch import exceptions
 
 from elasticsearch import AsyncElasticsearch, NotFoundError
 from pydantic import BaseModel
 
-from src.db.backoff_decorator import backoff
+from db.backoff_decorator import backoff
 
 es: AsyncElasticsearch | None = None
 
@@ -15,6 +15,7 @@ class ElasticService:
         self._index = index
         self._schema = schema
 
+    @backoff((exceptions.ConnectionError,), 1, 2, 100, 10)
     async def get_one(self, document_id: str):
         try:
             doc = await self._es.get(index=self._index, id=document_id)
@@ -22,6 +23,7 @@ class ElasticService:
             return None
         return self._schema(**doc['_source'])
 
+    @backoff((exceptions.ConnectionError,), 1, 2, 100, 10)
     async def get_list(
             self,
             body,
