@@ -1,11 +1,14 @@
 from functools import lru_cache
 
-from elasticsearch import AsyncElasticsearch, NotFoundError
+from aiohttp import ClientConnectorError
+from elasticsearch import AsyncElasticsearch, NotFoundError, exceptions
 from fastapi import Depends
 
 from db.elastic import get_elastic
 from db.redis_db import DataCache
 from models.genre import Genre
+
+from src.db.backoff_decorator import backoff
 
 
 class GenreService(DataCache):
@@ -15,6 +18,7 @@ class GenreService(DataCache):
         self.elastic = elastic
         self.idx = 'genres'
 
+    @backoff((exceptions.ConnectionError, ClientConnectorError), 1, 2, 100, 10)
     async def get_genre(self, genre_id: str = None, n_elem: int = 100, page: int = 1) -> Genre | list[Genre] | None:
 
         genre_cache = f'g_{genre_id}{n_elem}{page}'
