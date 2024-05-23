@@ -100,4 +100,43 @@ def get_es_data(test_for: str):
                 ]
             }]
 
+        case 'list_persons':
+            es_data = [{
+                "id": str(uuid.uuid4()),
+                "name": "John Snow",
+                "films": [
+                    {
+                        "id": "00af52ec-9345-4d66-adbe-50eb917f463a",
+                        "roles": ["actor"],
+                        "imdb_rating": 7.8
+                    },
+                ]
+            } for _ in range(10)]
+
+        case 'person_by_id':
+            es_data = [{
+                "id": "3d8d9bf5-0d90-4353-88ba-4ccc5d2c07ff",
+                "name": "John Snow",
+                "films": [
+                    {
+                        "id": "00af52ec-9345-4d66-adbe-50eb917f463a",
+                        "roles": ["actor"],
+                        "imdb_rating": 7.8
+                    },
+                ]
+            }]
+
+        case 'persons_valid':
+            es_data = [{
+                "id": "3d8d9bf5-0d90-4353-88ba-4ccc5d2c07ff",
+                "name": 1,
+                "films": [
+                    {
+                        "id": "00af52ec-9345-4d66-adbe-50eb917f463a",
+                        "roles": ["actor"],
+                        "imdb_rating": 7.8
+                    },
+                ]
+            }]
+
     return es_data

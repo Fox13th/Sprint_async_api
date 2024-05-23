@@ -1,0 +1,46 @@
+
+services:
+  redis:
+    image: "redis:latest"
+    ports:
+      - "${REDIS_EXTERNAL_PORT}:${REDIS_INTERNAL_PORT}"
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.5.0
+    container_name: elasticsearch-tests
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    env_file:
+      - .env
+    ports:
+      - "${ES_EXTERNAL_PORT}:${ES_INTERNAL_PORT}"
+
+  fastapi:
+    build: ../../
+    image: fastapi-image
+    command: "uvicorn main:app --host 0.0.0.0 --port ${FAST_API_INTERNAL_PORT}"
+    expose:
+      - "${FAST_API_INTERNAL_PORT}"
+    ports:
+      - "${FAST_API_EXTERNAL_PORT}:${FAST_API_INTERNAL_PORT}"
+    restart: on-failure
+    volumes:
+      - ../../:/app
+    env_file:
+      - ../../.env
+    depends_on:
+      - redis
+
+  tests:
+    build: .
+    depends_on:
+      - redis
+      - elasticsearch
+    working_dir: /app
+    environment:
+      - PYTHONPATH=/app
+    entrypoint: >
+      sh -c "python3 /app/functional/utils/wait_for_es.py
+      && python3 /app/functional/utils/wait_for_redis.py
+      && pytest /app/functional/src"

@@ -10,11 +10,11 @@ from db.elastic import get_elastic
 from db.redis_db import DataCache
 from models.film import Film, FilmMainData
 
-from src.services.backoff_decorator import backoff
+from services.backoff_decorator import backoff
 
 
 class FilmService(DataCache):
-    def __init__(self, elastic: AsyncElasticsearch()):
+    def __init__(self, elastic: AsyncElasticsearch):
         DataCache.__init__(self, Film, FilmMainData)
 
         self.elastic = elastic

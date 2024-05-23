@@ -6,6 +6,7 @@ import aiohttp
 import pytest_asyncio
 import redis
 from elasticsearch import AsyncElasticsearch
+from functional.settings import test_settings
 
 from elasticsearch.helpers import async_bulk
 from redis.asyncio.client import Redis
@@ -14,6 +15,7 @@ from .settings import test_settings
 
 from .models.film import Film
 from .models.genre import Genre
+from .models.person import Person
 
 
 @pytest_asyncio.fixture(name='valid_data')
@@ -25,6 +27,8 @@ def valid_data():
             try:
                 if model_idx == 'genres':
                     Genre(**row)
+                elif model_idx == 'persons':
+                    Person(**row)
                 else:
                     Film(**row)
                 data = {'_index': model_idx, '_id': row['id']}
@@ -47,14 +51,14 @@ def event_loop():
 
 @pytest_asyncio.fixture(name='es_client', scope='session')
 async def es_client():
-    es_client = AsyncElasticsearch(hosts=test_settings.es_host, verify_certs=False)
+    es_client = AsyncElasticsearch(hosts=[f'{test_settings.es_host}:9200'], verify_certs=False)
     yield es_client
     await es_client.close()
 
 
 @pytest_asyncio.fixture(name='redis_cl', scope='session')
 async def redis_cl():
-    redis_conn = Redis(host=test_settings.redis_host, socket_connect_timeout=1)
+    redis_conn = Redis(host=test_settings.redis_host, socket_connect_timeout=1, port=6379)
     yield redis_conn
     await redis_conn.close()
 
@@ -69,6 +73,8 @@ def es_write_data(es_client, redis_cl):
 
         if es_index == 'movies':
             mapping = test_settings.es_index_mapping
+        elif es_index == 'persons':
+            mapping = test_settings.p_es_index_mapping
         else:
             mapping = test_settings.g_es_index_mapping
 
@@ -77,7 +83,7 @@ def es_write_data(es_client, redis_cl):
                                        mappings=mapping)
 
         updated, errors = await async_bulk(client=es_client, actions=es_data, refresh=True)
-
+        result = await es_client.search(index=es_index)
         if errors:
             raise Exception('Ошибка записи данных в Elasticsearch')
 

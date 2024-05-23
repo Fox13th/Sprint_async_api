@@ -1,19 +1,22 @@
 from pydantic import Field
 from pydantic_settings import BaseSettings
-from .testdata.es_mapping import settings, mappings, mappings_genre
+from .testdata.es_mapping import settings, mappings, mappings_genre, mappings_person
+import os
 
 
 class TestSettings(BaseSettings):
-    es_host: str = Field('http://127.0.0.1:9200', env='ELASTIC_HOST')
+    # es_host: str = Field('http://127.0.0.1:9200', os.getenv('ELASTIC_HOST'))
+    es_host: str = os.getenv("ELASTIC_HOST", "http://elasticsearch")
     es_index: str = 'movies'
 
     es_index_setting: dict = settings
 
     es_index_mapping: dict = mappings
     g_es_index_mapping: dict = mappings_genre
+    p_es_index_mapping: dict = mappings_person
 
-    redis_host: str = '127.0.0.1'
-    service_url: str = Field('http://127.0.0.1:8000')
+    redis_host: str = os.getenv("REDIS_HOST", "redis")
+    service_url: str = os.getenv("SERVICE_URL", "http://fastapi:8000")
 
 
 test_settings = TestSettings()
