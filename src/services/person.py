@@ -1,35 +1,18 @@
 from functools import lru_cache
-
-from aiohttp import ClientConnectorError
-from elasticsearch import exceptions
-
-from db.elastic import get_elastic_service
-from db.redis_db import get_redis_service
 from models.person import Person
+from services.base import BaseService
 
-from db.backoff_decorator import backoff
 
+class PersonService(BaseService):
 
-class PersonService:
     def __init__(self):
-        self._redis_service = get_redis_service(data_model=Person)
-        self._elastic_service = get_elastic_service(index='persons', schema=Person)
+        super().__init__(index='persons', schema=Person)
 
-    @backoff((exceptions.ConnectionError, ClientConnectorError), 1, 2, 100, 10)
     async def get_by_id(self, person_id: str) -> Person | None:
 
         person_cache = f'p_{person_id}'
-        person = await self._redis_service.get_from_cache(person_cache)
-        if person:
-            return person
+        return await self._get_one_document(person_id, person_cache)
 
-        person = await self._elastic_service.get_one(document_id=person_id)
-        if not person:
-            return None
-        await self._redis_service.put_to_cache(person, person_cache)
-        return person
-
-    @backoff((exceptions.ConnectionError, ClientConnectorError), 1, 2, 100, 10)
     async def get_list(
             self,
             page_number: int = 1,
@@ -38,10 +21,6 @@ class PersonService:
     ) -> list[Person] | None:
 
         person_cache = f'p_{page_number}{page_size}{query}'
-        persons = await self._redis_service.get_from_cache(person_cache)
-        if persons:
-            return persons
-
         if not query:
             body = {
                 'query': {
@@ -58,11 +37,13 @@ class PersonService:
                     }
                 },
             }
-        persons = await self._elastic_service.get_list(body=body, page_number=page_number, page_size=page_size)
-        if not persons:
-            return None
-        await self._redis_service.put_to_cache(persons, person_cache)
-        return persons
+        persons_list = await self._get_list_documents(
+            page_number=page_number,
+            page_size=page_size,
+            body=body,
+            cache_key=person_cache
+        )
+        return persons_list
 
 
 @lru_cache()
