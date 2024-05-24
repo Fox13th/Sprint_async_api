@@ -7,7 +7,7 @@ services:
 
   elasticsearch:
     image: elasticsearch:8.5.0
-    container_name: elasticsearch-tests
+    container_name: docker.elastic.co/elasticsearch/elasticsearch:8.5.0
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
