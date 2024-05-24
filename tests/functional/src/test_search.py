@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 import pytest
 
 from functional.testdata.es_data import get_es_data
@@ -10,19 +12,19 @@ from functional.testdata.es_data import get_es_data
                 'films',
                 get_es_data('search'),
                 {'query': 'star'},
-                {'status': 200, 'length': 50, 'errors': 0}
+                {'status': HTTPStatus.OK, 'length': 50, 'errors': 0}
         ),
         (
                 'films',
                 get_es_data('search'),
                 {'query': 'Mashed potato'},
-                {'status': 404, 'length': 1, 'errors': 0}
+                {'status': HTTPStatus.NOT_FOUND, 'length': 1, 'errors': 0}
         ),
         (
                 'films',
                 get_es_data('search_valid'),
                 {'query': 'star'},
-                {'status': 404, 'length': 1, 'errors': 1}
+                {'status': HTTPStatus.NOT_FOUND, 'length': 1, 'errors': 1}
         )
     ]
 )
