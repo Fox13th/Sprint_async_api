@@ -1,4 +1,5 @@
-from typing import Type
+from abc import ABC, abstractmethod
+from typing import Type, TypeVar
 from elasticsearch import exceptions
 
 from elasticsearch import AsyncElasticsearch, NotFoundError
@@ -6,17 +7,29 @@ from pydantic import BaseModel
 
 from db.backoff_decorator import backoff
 
+
 es: AsyncElasticsearch | None = None
+T = TypeVar('T', bound=BaseModel)
 
 
-class ElasticService:
+class AsyncSearchEngine(ABC):
+    @abstractmethod
+    async def get_by_id(self, document_id: str) -> T | None:
+        pass
+
+    @abstractmethod
+    async def get_list(self, body, page_number: int = 1, page_size: int = 50) -> list[T] | None:
+        pass
+
+
+class ElasticAsyncSearchEngine(AsyncSearchEngine):
     def __init__(self, index: str, schema: Type[BaseModel]):
         self._es = es
         self._index = index
         self._schema = schema
 
     @backoff((exceptions.ConnectionError,), 1, 2, 100, 10)
-    async def get_one(self, document_id: str):
+    async def get_by_id(self, document_id: str):
         try:
             doc = await self._es.get(index=self._index, id=document_id)
         except NotFoundError:
@@ -42,5 +55,5 @@ class ElasticService:
         return documents
 
 
-def get_elastic_service(index: str, schema: Type[BaseModel]) -> ElasticService:
-    return ElasticService(index=index, schema=schema)
+def get_elastic_service(index: str, schema: Type[BaseModel]) -> ElasticAsyncSearchEngine:
+    return ElasticAsyncSearchEngine(index=index, schema=schema)

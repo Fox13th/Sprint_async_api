@@ -1,5 +1,6 @@
+from abc import ABC, abstractmethod
 from functools import lru_cache
-from typing import Type
+from typing import Type, TypeVar
 
 import orjson
 from pydantic import BaseModel
@@ -9,11 +10,21 @@ from redis.exceptions import ConnectionError
 from db.backoff_decorator import backoff
 
 redis: Redis | None = None
-
 DATA_CACHE_EXPIRE_IN_SECONDS = 60 * 5
+T = TypeVar('T', bound=BaseModel)
 
 
-class DataCache:
+class CacheService(ABC):
+    @abstractmethod
+    async def get_from_cache(self, key_cache: str) -> T | list[T] | None:
+        pass
+
+    @abstractmethod
+    async def put_to_cache(self, data, key_cache: str) -> None:
+        pass
+
+
+class RedisCacheService(CacheService):
     def __init__(self, data_model, main_data_model=None):
         self.redis: Redis | None = redis
 
@@ -39,20 +50,20 @@ class DataCache:
         return film
 
     @backoff((ConnectionError), 1, 2, 100, 10)
-    async def put_to_cache(self, film, key_cache: str):
+    async def put_to_cache(self, data, key_cache: str):
 
-        if type(film) == list:
-            f_list = [f_data.json() for f_data in film]
+        if isinstance(data, list):
+            f_list = [f_data.json() for f_data in data]
             await self.redis.set(key_cache, orjson.dumps(f_list), DATA_CACHE_EXPIRE_IN_SECONDS)
         else:
-            await self.redis.set(key_cache, film.json(), DATA_CACHE_EXPIRE_IN_SECONDS)
+            await self.redis.set(key_cache, data.json(), DATA_CACHE_EXPIRE_IN_SECONDS)
 
 
 def get_redis_service(
         data_model: Type[BaseModel],
         main_data_model: Type[BaseModel] = None
 ):
-    redis_service = DataCache(
+    redis_service = RedisCacheService(
         data_model=data_model,
         main_data_model=main_data_model
     )
