@@ -17,4 +17,3 @@ def es_ping():
 if __name__ == '__main__':
     load_dotenv()
     es_ping()
-W

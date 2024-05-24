@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from functools import lru_cache
 from typing import Type, TypeVar
 
 import orjson
@@ -35,7 +34,7 @@ class RedisCacheService(CacheService):
         else:
             self.main_data_model = data_model
 
-    @backoff((ConnectionError), 1, 2, 100, 10)
+    @backoff((ConnectionError,), 1, 2, 100, 10)
     async def get_from_cache(self, key_cache: str):
 
         data = await self.redis.get(key_cache)
@@ -49,7 +48,7 @@ class RedisCacheService(CacheService):
 
         return film
 
-    @backoff((ConnectionError), 1, 2, 100, 10)
+    @backoff((ConnectionError,), 1, 2, 100, 10)
     async def put_to_cache(self, data, key_cache: str):
 
         if isinstance(data, list):

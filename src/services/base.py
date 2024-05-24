@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import TypeVar
-from typing import Type
+from typing import TypeVar, Type
+
 from elasticsearch import AsyncElasticsearch
 from pydantic import BaseModel
 
