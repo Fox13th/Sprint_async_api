@@ -9,7 +9,7 @@ class GenreService(BaseService):
         super().__init__(index='genres', schema=Genre)
 
     async def get_by_id(self, genre_id: str) -> Genre | None:
-        genre_cache = f'f_{genre_id}'
+        genre_cache = f'g_{genre_id}'
         return await self._get_one_document(genre_id, genre_cache)
 
     async def get_list(
