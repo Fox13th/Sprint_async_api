@@ -1,9 +1,9 @@
 import redis
 from redis import Redis
 
-from tests.functional.settings import test_settings
+from functional.settings import test_settings
 
-from tests.functional.utils.backoff_decorator import backoff
+from functional.utils.backoff_decorator import backoff
 
 
 @backoff((redis.exceptions.ConnectionError, ), 1, 2, 100)

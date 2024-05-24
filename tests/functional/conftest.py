@@ -1,10 +1,7 @@
 import asyncio
-import uuid
-from asyncio import sleep
 
 import aiohttp
 import pytest_asyncio
-import redis
 from elasticsearch import AsyncElasticsearch
 from functional.settings import test_settings
 
