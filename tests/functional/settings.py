@@ -1,4 +1,3 @@
-from pydantic import Field
 from pydantic_settings import BaseSettings
 from .testdata.es_mapping import settings, mappings, mappings_genre, mappings_person
 import os
