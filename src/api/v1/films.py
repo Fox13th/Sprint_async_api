@@ -4,6 +4,7 @@ from http import HTTPStatus
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from models.film import Film, FilmMainData
+from services.auth import security_jwt
 from services.film import FilmService, get_film_service
 
 router = APIRouter()
@@ -17,6 +18,7 @@ router = APIRouter()
             tags=['Общий вывод']
             )
 async def popular_films(
+        user: Annotated[dict, Depends(security_jwt(required_roles=['superuser']))],
         sort: str | None = '-imdb_rating',
         genre: str | None = None,
         page_size: Annotated[int, Query(description='Количество элементов на странице', ge=1)] = 50,
@@ -27,11 +29,16 @@ async def popular_films(
     Вывод популярных фильмов.
     Пример запроса: http://127.0.0.1:8000/api/v1/films?sort=-imdb_rating&page_number=1&page_size=50
                     http://127.0.0.1:8000/api/v1/films?sort=-imdb_rating&genre=5373d043-3f41-4ea8-9947-4b746c601bbd
+    :param user:
+    :param film_service:
     :param genre: Фильтрация по жанру
     :param page_size: Количество элементов на странице
     :param page_number: Номер страницы
     :param sort: По какому полю сортировать; по умолчанию: '-imdb_rating'
     """
+    print(user['sub'])
+    print(user['sub']['user_id'])
+
     films = await film_service.get_list(
         page_number=page_number,
         page_size=page_size,
