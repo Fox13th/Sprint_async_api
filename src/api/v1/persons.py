@@ -4,6 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from models.person import Person, PersonFilm
+from services.auth import security_jwt
 from services.person import PersonService, get_person_service
 
 router = APIRouter()
@@ -17,6 +18,7 @@ router = APIRouter()
             tags=['Общий вывод']
             )
 async def persons(
+        user: Annotated[dict, Depends(security_jwt(required_roles=['user']))],
         page_number: Annotated[int, Query(description='Page number', ge=1)] = 1,
         page_size: Annotated[int, Query(description='Pagination page size', ge=1)] = 10,
         person_service: PersonService = Depends(get_person_service)
@@ -41,6 +43,7 @@ async def persons(
             tags=['Полнотекстовой поиск']
             )
 async def persons_search(
+        user: Annotated[dict, Depends(security_jwt(required_roles=['user']))],
         page_number: Annotated[int, Query(description='Page number', ge=1)] = 1,
         page_size: Annotated[int, Query(description='Pagination page size', ge=1)] = 10,
         query: str = None,
@@ -67,6 +70,7 @@ async def persons_search(
             tags=['Поиск по id']
             )
 async def person_details(
+        user: Annotated[dict, Depends(security_jwt(required_roles=['user']))],
         person_id: str,
         person_service: PersonService = Depends(get_person_service)
 ) -> Person:
@@ -87,6 +91,7 @@ async def person_details(
             tags=['Поиск по id']
             )
 async def person_details(
+        user: Annotated[dict, Depends(security_jwt(required_roles=['user']))],
         person_id: str,
         person_service: PersonService = Depends(get_person_service)
 ) -> list[PersonFilm]:
