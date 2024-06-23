@@ -9,4 +9,5 @@
 1) API проекта **http://0.0.0.0:8000/api/openapi**
 2) GitHub **ETL** **https://github.com/EsterTar/admin_panel_sprint_3/**
 3) GitHub **проекта**  **https://github.com/Fox13th/Sprint_async_api.git**
-4) GitHub **резерв проекта**  **https://github.com/Fox13th/5_Sprint_Async_API.git**
+4) GitHub **Django Admin** **https://github.com/EsterTar/admin_panel_sprint_3.git**
+6) GitHub **Auth Service**  **https://github.com/Fox13th/Auth_Service.git**
