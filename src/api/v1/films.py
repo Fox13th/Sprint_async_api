@@ -18,7 +18,7 @@ router = APIRouter()
             tags=['Общий вывод']
             )
 async def popular_films(
-        user: Annotated[dict, Depends(security_jwt(required_roles=['superuser']))],
+        user: Annotated[dict, Depends(security_jwt(required_roles=['user']))],
         sort: str | None = '-imdb_rating',
         genre: str | None = None,
         page_size: Annotated[int, Query(description='Количество элементов на странице', ge=1)] = 50,
@@ -36,8 +36,6 @@ async def popular_films(
     :param page_number: Номер страницы
     :param sort: По какому полю сортировать; по умолчанию: '-imdb_rating'
     """
-    print(user['sub'])
-    print(user['sub']['user_id'])
 
     films = await film_service.get_list(
         page_number=page_number,
@@ -58,6 +56,7 @@ async def popular_films(
             tags=['Полнотекстовой поиск']
             )
 async def search_films(
+        user: Annotated[dict, Depends(security_jwt(required_roles=['user']))],
         query: str,
         page_size: Annotated[int, Query(description='Количество элементов на странице', ge=1)] = 50,
         page_number: Annotated[int, Query(description='Номер страницы', ge=1)] = 1,
@@ -66,6 +65,8 @@ async def search_films(
     """
     Поиск по фильмам.
     Пример запроса: http://127.0.0.1:8000/api/v1/films/search/?query=star&page_number=1&page_size=50
+    :param film_service:
+    :param user:
     :param query: Поисковое слово
     :param page_size: количество найденных фильмов на странице
     :param page_number: номер страницы
@@ -90,11 +91,17 @@ async def search_films(
             response_description="Название, рейтинг, описание, жанр, съемочная команда фильма",
             tags=['Поиск по id']
             )
-async def film_details(film_id: str, film_service: FilmService = Depends(get_film_service)) -> Film:
+async def film_details(
+        user: Annotated[dict, Depends(security_jwt(required_roles=['user']))],
+        film_id: str,
+        film_service: FilmService = Depends(get_film_service)
+) -> Film:
     """
     Вывод кино по id.
     Пример запроса: http://127.0.0.1:8000/api/v1/films/833b1926-ef16-49a1-b41d-eddd618a036e
                     http://127.0.0.1:8000/api/v1/films/4e5184c8-54eb-4f09-be83-4f95affe42a8
+    :param film_service:
+    :param user:
     :param film_id: id кинофильма
     """
     film = await film_service.get_by_id(film_id=film_id)

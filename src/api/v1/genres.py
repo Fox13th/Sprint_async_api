@@ -3,6 +3,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
+from services.auth import security_jwt
 from services.genres import GenreService, get_genre_service
 from models.genre import Genre
 
@@ -17,6 +18,7 @@ router = APIRouter()
             tags=['Общий вывод']
             )
 async def list_genres(
+        user: Annotated[dict, Depends(security_jwt(required_roles=['user']))],
         page_size: Annotated[int, Query(description='Количество элементов на странице', ge=1)] = 50,
         page_number: Annotated[int, Query(description='Номер страницы', ge=1)] = 1,
         genre_service: GenreService = Depends(get_genre_service)
@@ -24,6 +26,7 @@ async def list_genres(
     """
     Вывод списка жанров
     Пример запроса: http://127.0.0.1:8000/api/v1/genres
+    :param user:
     :param page_size: Количество элементов на странице
     :param page_number: Номер страницы
     """
@@ -46,10 +49,16 @@ async def list_genres(
             response_description="Название, описание и связанные фильмы",
             tags=['Поиск по id']
             )
-async def genre_details(genre_id: str, genre_service: GenreService = Depends(get_genre_service)) -> Genre:
+async def genre_details(
+        user: Annotated[dict, Depends(security_jwt(required_roles=['user']))],
+        genre_id: str,
+        genre_service: GenreService = Depends(get_genre_service)
+) -> Genre:
     """
     Вывод жанра по id.
     Пример запроса: http://127.0.0.1:8000/api/v1/genres/5373d043-3f41-4ea8-9947-4b746c601bbd
+    :param genre_service:
+    :param user:
     :param genre_id: id кинофильма
     """
 
