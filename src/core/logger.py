@@ -1,6 +1,21 @@
-LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-LOG_DEFAULT_HANDLERS = ['console', ]
+import json
+import logging
 
+
+# Определение JSON Formatter
+class JsonFormatter(logging.Formatter):
+    def format(self, record):
+        log_data = {
+            'asctime': self.formatTime(record, self.datefmt),
+            'name': record.name,
+            'levelname': record.levelname,
+            'message': record.getMessage(),
+        }
+        return json.dumps(log_data)
+
+
+LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+LOG_DEFAULT_HANDLERS = ['console', 'file']
 
 LOGGING = {
     'version': 1,
@@ -8,6 +23,10 @@ LOGGING = {
     'formatters': {
         'verbose': {
             'format': LOG_FORMAT
+        },
+        'json': {
+            '()': JsonFormatter,
+            'format': logging.BASIC_FORMAT,
         },
         'default': {
             '()': 'uvicorn.logging.DefaultFormatter',
@@ -24,6 +43,12 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
+        },
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'logs/async_api.json',
+            'formatter': 'json',
         },
         'default': {
             'formatter': 'default',

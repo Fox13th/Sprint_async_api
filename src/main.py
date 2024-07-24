@@ -1,4 +1,5 @@
 import uvicorn
+import sentry_sdk
 from elasticsearch import AsyncElasticsearch
 from fastapi import FastAPI, Request
 from fastapi.responses import ORJSONResponse
@@ -7,9 +8,10 @@ from contextlib import asynccontextmanager
 
 from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
 from opentelemetry.exporter.jaeger.thrift import JaegerExporter
+from starlette.middleware.errors import ServerErrorMiddleware
+from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from starlette import status
 
@@ -35,6 +37,12 @@ async def lifespan(app: FastAPI):
     await elastic.es.close()
 
 
+sentry_sdk.init(
+    dsn=settings.sentry_dsn,
+    traces_sample_rate=1.0,
+    profiles_sample_rate=1.0,
+)
+
 app = FastAPI(
     title='Read-only API для онлайн-кинотеатра',
     description='Информация о фильмах, жанрах и людях, участвовавших в создании произведения',
@@ -44,6 +52,7 @@ app = FastAPI(
     default_response_class=ORJSONResponse,
     lifespan=lifespan
 )
+
 
 def configure_tracer() -> None:
     trace.set_tracer_provider(TracerProvider())
@@ -67,6 +76,8 @@ async def before_request(request: Request, call_next):
         return ORJSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={'detail': 'X-Request-Id is required'})
     return response
 
+app.add_middleware(ServerErrorMiddleware)
+app.add_middleware(TrustedHostMiddleware, allowed_hosts=["*"])
 app.include_router(films.router, prefix='/api/v1/films', tags=['films'])
 app.include_router(genres.router, prefix='/api/v1/genres', tags=['genres'])
 app.include_router(persons.router, prefix='/api/v1/persons', tags=['persons'])

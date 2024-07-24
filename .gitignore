@@ -132,3 +132,5 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 /tests/.example.env
+/src/logs/auth_service.json
+/src/logs/async_api.json

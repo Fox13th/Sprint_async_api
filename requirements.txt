@@ -16,3 +16,5 @@ opentelemetry-exporter-jaeger==1.17.0
 python-dotenv==1.0.1
 starlette==0.37.2
 aiohttp==3.8.6
+itsdangerous==2.2.0
+sentry-sdk==2.10.0

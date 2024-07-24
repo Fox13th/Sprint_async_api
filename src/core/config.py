@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     jwt_algorithm: str = os.environ.get('JWT_ALGORITHM')
 
     debug: bool = os.environ.get('DEBUG')
+    sentry_dsn: str = os.environ.get("SENTRY_DSN")
 
     class Config:
         env_file = ".env"
