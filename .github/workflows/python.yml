@@ -31,9 +31,9 @@ jobs:
 
     - name: Lint with wemake-python-styleguide
       run: |
-        flake8 . --format=html --htmldir=flake-report
+        flakeheaven lint . --format=html > flake-report.html
         # Uncomment the following line to fail the build on linting errors
-        # flake8 . --format=html --htmldir=flake-report --exit-zero
+        # flakeheaven lint . --exit-zero
 
     - name: Type check with mypy
       run: |
